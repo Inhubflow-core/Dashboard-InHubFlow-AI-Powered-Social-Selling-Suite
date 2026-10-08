@@ -1,0 +1,32 @@
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  isSender: boolean;
+  text: string;
+  timestamp: string;
+  attachment?: {
+    name: string;
+    type: "pdf" | "audio" | "image";
+    size?: string;
+  };
+}
+
+export interface ChatConversation {
+  id: string;
+  leadId: string;
+  leadName: string;
+  leadTitle: string;
+  company: string;
+  location: string;
+  avatarInitials: string;
+  campaignSource: string;
+  leadMagnetUsed?: string;
+  crmStage: string;
+  crmStageId: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unread: boolean;
+  aiSuggestions: string[];
+  messages: ChatMessage[];
+}

@@ -1,0 +1,672 @@
+"use client";
+
+import ComponentCard from "@/components/common/ComponentCard";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import { exportCarouselToPdf } from "@/lib/viral-posts/carousel-exporter";
+import {
+  getSelectedTemplateForModeling,
+  setSelectedTemplateForModeling,
+  useCreatedPosts,
+} from "@/lib/viral-posts/store";
+import type { CarouselSlide, CreatedPost, PostFormat } from "@/lib/viral-posts/types";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function CreateViralPostPage() {
+  const router = useRouter();
+  const { addPost } = useCreatedPosts();
+
+  const [format, setFormat] = useState<PostFormat>("text");
+  const [topic, setTopic] = useState("Social Selling B2B");
+  const [leadMagnetKeyword, setLeadMagnetKeyword] = useState("SISTEMA");
+  const [content, setContent] = useState("");
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  // Carrusel slides state
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [carouselTheme, setCarouselTheme] = useState({
+    primaryColor: "#0099ff",
+    fontFamily: "Outfit",
+    authorName: "Roberto | InHubFlow",
+    authorHandle: "@inhubflow",
+  });
+
+  const [slides, setSlides] = useState<CarouselSlide[]>([
+    {
+      slideNumber: 1,
+      isCover: true,
+      title: "Como Convertir Comentarios en Clientes B2B",
+      subtitle: "Framework Inbound de 4 Pasos para LinkedIn",
+      content: ["InHubFlow Social Selling", "Por Roberto"],
+      footerText: "@inhubflow",
+    },
+    {
+      slideNumber: 2,
+      title: "El Problema del Mensaje en Frio",
+      content: [
+        "El decisor percibe spam antes de entender tu propuesta.",
+        "Tasa de respuesta inferior al 3% en frio tradicional.",
+        "Bloqueo comercial de tu perfil personal.",
+      ],
+      footerText: "Paso 1: Diagnostico",
+    },
+    {
+      slideNumber: 3,
+      title: "La Alternativa Inbound",
+      content: [
+        "Crea un activo de valor concreto (Plantilla o Playbook).",
+        "Publica mostrando los resultados tangibles.",
+        "Pide una palabra clave de activacion en los comentarios.",
+      ],
+      footerText: "Paso 2: Activacion",
+    },
+    {
+      slideNumber: 4,
+      title: "Entrega Instantanea en DM",
+      content: [
+        "El monitor detecta el comentario con la palabra clave.",
+        "Valida el estado de conexion en LinkedIn.",
+        "Despacha el PDF directamente al chat privado.",
+      ],
+      footerText: "Paso 3: Automatizacion",
+    },
+    {
+      slideNumber: 5,
+      isCta: true,
+      title: "¿Quieres Implementar Este Sistema?",
+      subtitle: "Recibe el documento de trabajo completo en PDF",
+      content: [
+        "Comenta SISTEMA en esta publicacion",
+        "Te envio la guia por mensaje privado hoy mismo.",
+      ],
+      footerText: "InHubFlow Social Selling",
+    },
+  ]);
+
+  // Al cargar, verificar si venimos con un post seleccionado del Radar Viral
+  useEffect(() => {
+    const selected = getSelectedTemplateForModeling();
+    if (selected) {
+      setFormat(selected.format);
+      setTopic(selected.topic);
+
+      if (selected.format === "text") {
+        setContent(`Construir autoridad en LinkedIn requiere consistencia y un gancho probado:
+
+${selected.hook}
+
+1. Entiende el dolor antes de proponer tu oferta.
+2. Comparte frameworks accionables en cada publicacion.
+3. Genera conversacion genuina con preguntas directas.
+
+Comenta "${leadMagnetKeyword}" abajo si deseas recibir nuestro playbook completo.`);
+      } else if (selected.format === "image") {
+        setContent(`La claridad en tu propuesta comercial es la mejor inversion que puedes hacer este mes:
+
+${selected.hook}
+
+Revisa los puntos clave en la imagen adjunta y aplicalos hoy.`);
+        setImagePrompt(
+          selected.imagePrompt ||
+            "Minimalist executive desk setup with laptop showing pipeline growth chart, warm ambient corporate blue tones, hyper-realistic 8k."
+        );
+      } else if (selected.format === "carousel") {
+        setContent(`Desliza el carrusel completo para ver la guia detallada:
+
+${selected.hook}
+
+Comenta "${leadMagnetKeyword}" para enviarte la plantilla oficial en PDF por mensaje privado.`);
+        if (selected.carouselSlides && selected.carouselSlides.length > 0) {
+          setSlides(selected.carouselSlides);
+        }
+      }
+    } else {
+      setContent(`Construir un embudo inbound en LinkedIn solia tomar semanas.
+
+Hoy, la combinacion de contenido relevante y automatizacion relacional permite cerrar reuniones comerciales mientras duermes.
+
+A continuacion te comparto los 3 pasos esenciales:
+1. Publica contenido con llamados a la accion basados en activos de alto valor.
+2. Monitorea los comentarios con palabras clave activadoras.
+3. Entrega el recurso de forma inmediata en mensaje privado.
+
+Comenta "${leadMagnetKeyword}" abajo y te envio el framework completo en PDF sin costo.`);
+      setImagePrompt(
+        "Modern corporate laptop showing analytics dashboard on glass desk, subtle blue backlighting, photorealistic style, 8k resolution."
+      );
+    }
+  }, [leadMagnetKeyword]);
+
+  const handleCopyPrompt = () => {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(imagePrompt);
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 2500);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    await exportCarouselToPdf(slides, {
+      primaryColor: carouselTheme.primaryColor,
+      authorName: carouselTheme.authorName,
+      authorHandle: carouselTheme.authorHandle,
+      filename: `Carrusel_${topic.replace(/\s+/g, "_")}.pdf`,
+    });
+  };
+
+  const handleSavePost = (status: "draft" | "scheduled" | "published") => {
+    const newPost: CreatedPost = {
+      id: `post-${Date.now()}`,
+      title: content.split("\n")[0].substring(0, 70) || `Post sobre ${topic}`,
+      format,
+      content,
+      imagePrompt: format === "image" ? imagePrompt : undefined,
+      mediaUrl: previewImage || undefined,
+      carouselSlides: format === "carousel" ? slides : undefined,
+      carouselTheme: format === "carousel" ? carouselTheme : undefined,
+      leadMagnetKeyword,
+      status,
+      scheduledAt:
+        status === "scheduled" ? new Date(Date.now() + 86400000).toISOString() : undefined,
+      publishedAt: status === "published" ? new Date().toISOString() : undefined,
+      createdAt: new Date().toISOString(),
+      metrics:
+        status === "published"
+          ? { likes: 0, comments: 0, impressions: 0, leadsCaptured: 0 }
+          : undefined,
+    };
+
+    addPost(newPost);
+    setSelectedTemplateForModeling(null);
+    router.push("/viral-posts/list");
+  };
+
+  const currentSlide = slides[currentSlideIndex] || slides[0];
+
+  return (
+    <div className="space-y-6">
+      <PageBreadcrumb pageTitle="Modelador de Contenido con IA" />
+
+      <div className="grid grid-cols-12 gap-6">
+        {/* Panel Izquierdo: Editor y Controles */}
+        <div className="col-span-12 xl:col-span-7 space-y-6">
+          <ComponentCard
+            title="Configurador de Publicacion"
+            desc="Adapta la estructura y selecciona el formato de entrega para alimentar los monitores de señales."
+          >
+            <div className="space-y-5">
+              {/* Selector de 3 Formatos */}
+              <div>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Formato de Salida
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormat("text")}
+                    className={`rounded-xl p-3.5 text-center transition ${
+                      format === "text"
+                        ? "border-2 border-brand-500 bg-brand-50/50 dark:bg-brand-950/30"
+                        : "border border-gray-200 hover:border-gray-300 dark:border-gray-800"
+                    }`}
+                  >
+                    <p className="font-semibold text-xs text-gray-900 dark:text-white">
+                      1. Solo Texto
+                    </p>
+                    <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                      Storytelling & Gancho Viral
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormat("image")}
+                    className={`rounded-xl p-3.5 text-center transition ${
+                      format === "image"
+                        ? "border-2 border-brand-500 bg-brand-50/50 dark:bg-brand-950/30"
+                        : "border border-gray-200 hover:border-gray-300 dark:border-gray-800"
+                    }`}
+                  >
+                    <p className="font-semibold text-xs text-gray-900 dark:text-white">
+                      2. Texto + Imagen
+                    </p>
+                    <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                      Copy + Prompt para IA
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormat("carousel")}
+                    className={`rounded-xl p-3.5 text-center transition ${
+                      format === "carousel"
+                        ? "border-2 border-brand-500 bg-brand-50/50 dark:bg-brand-950/30"
+                        : "border border-gray-200 hover:border-gray-300 dark:border-gray-800"
+                    }`}
+                  >
+                    <p className="font-semibold text-xs text-gray-900 dark:text-white">
+                      3. Carrusel PDF
+                    </p>
+                    <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                      Diapositivas Vectoriales
+                    </p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tema y Palabra Clave de Lead Magnet */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
+                    Tema del Post
+                  </label>
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    placeholder="Tema principal..."
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs text-gray-800 focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
+                    Palabra Clave (Lead Magnet Nivel 1)
+                  </label>
+                  <input
+                    type="text"
+                    value={leadMagnetKeyword}
+                    onChange={(e) => setLeadMagnetKeyword(e.target.value.toUpperCase())}
+                    placeholder="SISTEMA, GUIA, AUDITORIA..."
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs font-mono font-semibold text-brand-600 focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-brand-400"
+                  />
+                </div>
+              </div>
+
+              {/* Formato 2: Generador de Prompt Visual */}
+              {format === "image" && (
+                <div className="rounded-xl border border-gray-200 p-4 bg-gray-50/60 dark:border-gray-800 dark:bg-gray-900/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-brand-600">
+                      Generador de Prompt Visual para Midjourney / Flux
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyPrompt}
+                      className="rounded-md bg-white border border-gray-300 px-2.5 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                    >
+                      {copiedPrompt ? "Copiado al Portapapeles" : "Copiar Prompt"}
+                    </button>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={imagePrompt}
+                    onChange={(e) => setImagePrompt(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 bg-white p-2.5 text-xs font-mono text-gray-800 focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                  />
+                  <div className="pt-2">
+                    <label className="block text-[11px] font-semibold uppercase text-gray-500 mb-1">
+                      Subir Imagen Generada (Opcional)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => setPreviewImage(reader.result as string);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 dark:file:bg-brand-950 dark:file:text-brand-300 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Formato 3: Editor de Diapositivas del Carrusel */}
+              {format === "carousel" && (
+                <div className="rounded-xl border border-gray-200 p-4 bg-gray-50/60 dark:border-gray-800 dark:bg-gray-900/40 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-brand-600">
+                        Editor de Diapositiva ({currentSlideIndex + 1} de {slides.length})
+                      </span>
+                      <p className="text-[11px] text-gray-500">
+                        {currentSlide.isCover
+                          ? "Portada del Carrusel"
+                          : currentSlide.isCta
+                          ? "Diapositiva Final de CTA"
+                          : "Diapositiva de Contenido"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={currentSlideIndex === 0}
+                        onClick={() => setCurrentSlideIndex((prev) => Math.max(0, prev - 1))}
+                        className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-700 disabled:opacity-40 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300"
+                      >
+                        Anterior
+                      </button>
+                      <button
+                        type="button"
+                        disabled={currentSlideIndex === slides.length - 1}
+                        onClick={() =>
+                          setCurrentSlideIndex((prev) => Math.min(slides.length - 1, prev + 1))
+                        }
+                        className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-700 disabled:opacity-40 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300"
+                      >
+                        Siguiente
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadPdf}
+                        className="rounded-lg bg-brand-500 px-3 py-1 text-xs font-semibold text-white hover:bg-brand-600 transition"
+                      >
+                        Descargar PDF
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 bg-white p-3.5 rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                        Titular de Diapositiva
+                      </label>
+                      <input
+                        type="text"
+                        value={currentSlide.title}
+                        onChange={(e) => {
+                          const updated = [...slides];
+                          updated[currentSlideIndex].title = e.target.value;
+                          setSlides(updated);
+                        }}
+                        className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-900 font-semibold focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      />
+                    </div>
+
+                    {currentSlide.subtitle !== undefined && (
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                          Subtitulo
+                        </label>
+                        <input
+                          type="text"
+                          value={currentSlide.subtitle}
+                          onChange={(e) => {
+                            const updated = [...slides];
+                            updated[currentSlideIndex].subtitle = e.target.value;
+                            setSlides(updated);
+                          }}
+                          className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-800 focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                        Puntos de Contenido (1 por linea)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={currentSlide.content.join("\n")}
+                        onChange={(e) => {
+                          const updated = [...slides];
+                          updated[currentSlideIndex].content = e.target.value.split("\n");
+                          setSlides(updated);
+                        }}
+                        className="w-full rounded-md border border-gray-300 p-2 text-xs font-mono text-gray-800 focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Editor de Texto del Post de LinkedIn */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Cuerpo del Post (Copy de LinkedIn)
+                  </label>
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                    {content.length} caracteres (Recomendado: 500 - 1,200)
+                  </span>
+                </div>
+                <textarea
+                  rows={8}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-white p-4 font-mono text-xs text-gray-800 leading-relaxed focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                />
+              </div>
+
+              {/* Acciones Finales */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => handleSavePost("draft")}
+                  className="rounded-lg border border-gray-300 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
+                >
+                  Guardar como Borrador
+                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleSavePost("scheduled")}
+                    className="rounded-lg border border-brand-500 px-4 py-2.5 text-xs font-semibold text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-950/20"
+                  >
+                    Programar Publicacion
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSavePost("published")}
+                    className="rounded-lg bg-brand-500 px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-600 transition"
+                  >
+                    Publicar Ahora (Unipile)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ComponentCard>
+        </div>
+
+        {/* Panel Derecho: Previsualización Fiel a LinkedIn */}
+        <div className="col-span-12 xl:col-span-5 space-y-6">
+          <ComponentCard
+            title="Previsualizacion Exacta en LinkedIn"
+            desc="Visualizacion exacta de escritorio con encuadre de imagen y carrusel."
+          >
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
+              {/* Cabecera de perfil */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-11 w-11 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
+                  IF
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-gray-900 dark:text-white">
+                    Roberto | InHubFlow
+                  </h4>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                    B2B Growth & Lead Gen Specialist • 1er
+                  </p>
+                  <p className="text-[10px] text-gray-400">Ahora • Publico</p>
+                </div>
+              </div>
+
+              {/* Texto del post */}
+              <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap dark:text-gray-200 mb-4 font-sans">
+                {content}
+              </div>
+
+              {/* Adjunto Visual según Formato */}
+              {format === "image" && (
+                <div className="mb-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800">
+                  {previewImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={previewImage}
+                      alt="Preview del Post"
+                      className="w-full h-56 object-cover"
+                    />
+                  ) : (
+                    <div className="h-56 flex flex-col items-center justify-center p-6 text-center text-gray-400">
+                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        Espacio de Imagen Adjunta
+                      </p>
+                      <p className="text-[11px] mt-1 max-w-xs font-mono">
+                        Prompt configurado para Midjourney
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {format === "carousel" && (
+                <div className="mb-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-theme-xs">
+                  {/* Vista fiel del Slide actual */}
+                  <div
+                    className="aspect-square w-full p-6 flex flex-col justify-between"
+                    style={{
+                      backgroundColor: currentSlide.isCover
+                        ? carouselTheme.primaryColor
+                        : currentSlide.isCta
+                        ? "#f5faff"
+                        : "#ffffff",
+                      color: currentSlide.isCover ? "#ffffff" : "#101828",
+                    }}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <span
+                          className="text-[11px] font-bold uppercase tracking-wider"
+                          style={{
+                            color: currentSlide.isCover
+                              ? "rgba(255,255,255,0.8)"
+                              : carouselTheme.primaryColor,
+                          }}
+                        >
+                          {currentSlide.isCover
+                            ? "Portada"
+                            : currentSlide.isCta
+                            ? "Llamado a la Accion"
+                            : `Slide ${currentSlide.slideNumber}`}
+                        </span>
+                        <span
+                          className="text-[11px]"
+                          style={{
+                            color: currentSlide.isCover ? "rgba(255,255,255,0.7)" : "#94a3b8",
+                          }}
+                        >
+                          {currentSlideIndex + 1} / {slides.length}
+                        </span>
+                      </div>
+
+                      <h3
+                        className="text-base font-bold mb-2 leading-snug"
+                        style={{
+                          color: currentSlide.isCover
+                            ? "#ffffff"
+                            : currentSlide.isCta
+                            ? carouselTheme.primaryColor
+                            : "#101828",
+                        }}
+                      >
+                        {currentSlide.title}
+                      </h3>
+
+                      {currentSlide.subtitle && (
+                        <p
+                          className="text-xs mb-4"
+                          style={{
+                            color: currentSlide.isCover ? "rgba(255,255,255,0.9)" : "#475467",
+                          }}
+                        >
+                          {currentSlide.subtitle}
+                        </p>
+                      )}
+
+                      <div className="space-y-2 mt-4">
+                        {currentSlide.content.map((c, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            {!currentSlide.isCover && (
+                              <span
+                                className="mt-1 h-1.5 w-1.5 rounded-full shrink-0"
+                                style={{
+                                  backgroundColor: currentSlide.isCta
+                                    ? carouselTheme.primaryColor
+                                    : "#0099ff",
+                                }}
+                              ></span>
+                            )}
+                            <p
+                              className="text-xs leading-relaxed"
+                              style={{
+                                color: currentSlide.isCover ? "rgba(255,255,255,0.9)" : "#334155",
+                              }}
+                            >
+                              {c}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div
+                      className="pt-3 border-t flex justify-between text-[10px]"
+                      style={{
+                        borderColor: currentSlide.isCover
+                          ? "rgba(255,255,255,0.2)"
+                          : "rgba(0,0,0,0.06)",
+                        color: currentSlide.isCover ? "rgba(255,255,255,0.8)" : "#94a3b8",
+                      }}
+                    >
+                      <span>{carouselTheme.authorName}</span>
+                      <span>{carouselTheme.authorHandle}</span>
+                    </div>
+                  </div>
+
+                  {/* Barra de navegación de carrusel */}
+                  <div className="flex items-center justify-between p-2.5 bg-gray-50 border-t border-gray-100 text-xs dark:bg-gray-800 dark:border-gray-700">
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Documento PDF de LinkedIn
+                    </span>
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        disabled={currentSlideIndex === 0}
+                        onClick={() => setCurrentSlideIndex((p) => Math.max(0, p - 1))}
+                        className="rounded px-2 py-0.5 text-xs bg-white border border-gray-200 disabled:opacity-40 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      >
+                        &larr;
+                      </button>
+                      <button
+                        type="button"
+                        disabled={currentSlideIndex === slides.length - 1}
+                        onClick={() => setCurrentSlideIndex((p) => Math.min(slides.length - 1, p + 1))}
+                        className="rounded px-2 py-0.5 text-xs bg-white border border-gray-200 disabled:opacity-40 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      >
+                        &rarr;
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Barra de interacción de LinkedIn */}
+              <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 dark:border-gray-800">
+                <span className="hover:text-gray-900 cursor-pointer">Reaccionar</span>
+                <span className="hover:text-gray-900 cursor-pointer">Comentar</span>
+                <span className="hover:text-gray-900 cursor-pointer">Compartir</span>
+                <span className="hover:text-gray-900 cursor-pointer">Enviar</span>
+              </div>
+            </div>
+          </ComponentCard>
+        </div>
+      </div>
+    </div>
+  );
+}
