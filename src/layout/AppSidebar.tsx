@@ -87,6 +87,11 @@ const navItems: NavItem[] = [
       { key: "pipelineCalendar", path: "/pipeline/calendar" },
     ],
   },
+  {
+    icon: <PlugInIcon />,
+    key: "linkedinAccounts",
+    path: "/linkedin-accounts",
+  },
 ];
 
 const othersItems: NavItem[] = [

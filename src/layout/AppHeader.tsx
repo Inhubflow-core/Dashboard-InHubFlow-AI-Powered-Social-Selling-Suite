@@ -3,6 +3,7 @@
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
+import LinkedInHeaderBadge from "@/components/header/LinkedInHeaderBadge";
 import { useSidebar } from "@/context/SidebarContext";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/utils";
@@ -170,6 +171,8 @@ const AppHeader: React.FC = () => {
           )}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
+            <LinkedInHeaderBadge />
+
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
