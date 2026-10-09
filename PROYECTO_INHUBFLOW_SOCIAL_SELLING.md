@@ -27,6 +27,16 @@ Las siguientes directrices son de cumplimiento estricto para todo el ciclo de di
    * Queda terminantemente prohibido el uso de emoticonos o emojis en la documentación, en el código fuente, en los textos de la interfaz de usuario y en cualquier comunicación del sistema.
    * La interfaz y la documentación deben mantener un estándar corporativo, sobrio y profesional.
 
+5. **Arquitectura SaaS Nativa y Principio Multi-Tenant Obligatorio**:
+   * Esta plataforma es por definición un Software como Servicio (SaaS) multi-tenant B2B. NO es una aplicación mono-usuario ni una herramienta de escritorio.
+   * Este principio rige de forma transversal todas las configuraciones, bases de datos, APIs y componentes visuales:
+     * **Aislamiento Estricto por Tenant**: Cada registro (cuentas de LinkedIn, secuencias de campañas, prospectos del CRM, conversaciones del Inbox, monitores de señales, publicaciones del Viral Engine y bases de conocimiento del SDR) está estrictamente indexado por `workspace_id` / `owner_id`. Ningún suscriptor puede ver datos de otro suscriptor.
+     * **Monetización basada en Multislots**: La capacidad operativa de cada cliente está regulada por su suscripción activa: Plan Starter (1 slot / $49/mes), Plan Growth (5 slots / $149/mes) o Plan Business (10 slots / $279/mes).
+     * **Aislamiento Intragrupo por Roles**: 
+       * **Super Admin**: Roberto OrSe (`inhubflow@gmail.com`) con 999 slots y panel de control global de suscriptores (`/admin/subscribers`).
+       * **Admin de Cuenta (Workspace Owner / Cliente SaaS)**: Supervisa todas las cuentas de LinkedIn de su organización, gestiona a su equipo (`/team`), asigna slots y contrata upgrades de plan (`/plans`).
+       * **Miembro de Equipo (Operador SDR)**: Acceso restringido exclusivamente a su propia cuenta asignada de LinkedIn y a sus propios prospectos. No ve las cuentas del Admin ni de sus compañeros, no puede conectar perfiles nuevos y no tiene acceso a las áreas de equipo o facturación.
+
 ---
 
 ## 2. Visión y Propuesta de Valor
@@ -40,6 +50,21 @@ A diferencia del outreach en frío tradicional, esta suite combina:
 2. **Signal Radar de 3 Niveles**: Detección en tiempo real de prospectos con intención de compra que interactúan con tus posts (Lead Magnets ManyChat), con los de tu competencia o con posts clave de la red.
 3. **Constructor Visual de Campañas (Estilo n8n)**: Un lienzo (canvas drag-and-drop) con nodos interactivos para diseñar flujos de prospección multietapa, con retardos humanos, bifurcaciones lógicas y envío de materiales (PDFs, audios y DMs).
 4. **CRM Pipeline & Unified Inbox**: Gestión sin fricción desde el comentario inicial hasta la reunión comercial agendada en el calendario.
+
+### 2.1 Principios Rectores Multi-Tenant Módulo por Módulo
+
+Para garantizar que toda nueva funcionalidad se diseñe y ejecute bajo la óptica de un SaaS B2B, cada módulo debe cumplir con los siguientes estándares de multi-tenancy:
+
+| Módulo | Comportamiento Multi-Tenant | Regla de Acceso por Rol |
+| :--- | :--- | :--- |
+| **Viral Post Engine** | Las publicaciones, borradores y plantillas pertenecen al `workspace_id`. Al programar un post, se selecciona la cuenta de LinkedIn (`account_id`) de los slots autorizados. | El Admin puede publicar en cualquier perfil del workspace. El Miembro solo puede programar para su cuenta asignada. |
+| **Signal Radar** | Los monitores de señales (Nivel 1, 2 y 3) consumen la cuota de monitores del plan (5 en Starter, 20 en Growth, ilimitados en Business). | Compartidos a nivel de workspace para que todo el equipo comercial aproveche los leads captados. |
+| **Campañas (Canvas n8n)** | Las secuencias se configuran a nivel de tenant y pueden orquestar envíos distribuidos entre múltiples cuentas de LinkedIn (`multi-account rotation`). | El Admin diseña y activa las campañas; los operadores ejecutan los pasos que requieran intervención en sus cuentas. |
+| **Leads & CRM** | Directorio centralizado por tenant. Los prospectos pueden ser asignados a operadores específicos (`assigned_user_id`). | El Admin tiene visión panorámica del CRM; los operadores pueden filtrar por "Mis Leads Asignados". |
+| **Inbox Unificado** | Bandejas segregadas por hilo y por cuenta de LinkedIn (`account_id`). | El Admin puede alternar y auditar los chats de todos sus operadores. El operador SDR solo ve sus propias conversaciones. |
+| **Pipeline & Calendario** | Métricas de conversión y etapas del Kanban calculadas para el workspace. | Visión consolidada para el Admin y visión filtrada por asignación para el operador. |
+| **Asistente SDR IA** | Cada tenant tiene su propio SDR Virtual con base de conocimiento propia (precios, servicios y objeciones de la empresa cliente), prompt de voz y correo de handoff. | El Admin define las políticas de IA. La cola de aprobaciones de un operador solo muestra los mensajes de su cuenta asignada. |
+| **Cuentas de LinkedIn** | Gestión centralizada de cupos (slots) contratados. El sistema valida `active_slots <= max_slots` antes de permitir nuevas conexiones Unipile. | El Admin gestiona y asigna las cuentas. El Miembro solo ve y opera su cuenta asignada sin permisos de desvinculación. |
 
 ---
 
