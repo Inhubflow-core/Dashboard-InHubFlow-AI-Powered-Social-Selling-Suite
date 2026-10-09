@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import LinkedInAccountCard from "@/components/unipile/LinkedInAccountCard";
 import ConnectLinkedInModal from "@/components/unipile/ConnectLinkedInModal";
@@ -257,15 +258,24 @@ export default function LinkedInAccountsPage() {
               </div>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5 text-brand-500" />
-              <span>Rotacion inteligente de User-Agent</span>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="size-3.5 text-[#0099ff]" />
+                <span>Rotacion inteligente de User-Agent</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Activity className="size-3.5 text-[#0099ff]" />
+                <span>Respeto de pacing limits para proteccion</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Activity className="size-3.5 text-brand-500" />
-              <span>Respeto de pacing limits para proteccion de cuentas</span>
-            </div>
+
+            <Link
+              href="/support/docs"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#0099ff]/10 px-3 py-1 text-xs font-semibold text-[#0099ff] hover:bg-[#0099ff]/20 transition"
+            >
+              <span>Abrir Sandbox & Webhooks</span>
+            </Link>
           </div>
         </div>
 

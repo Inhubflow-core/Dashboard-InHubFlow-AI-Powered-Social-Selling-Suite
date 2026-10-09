@@ -180,6 +180,17 @@ export default function SdrAgentPage() {
       status: "executed",
     });
 
+    // Despachar a LinkedIn vía API / Unipile (modo sandbox o live)
+    fetch('/api/unipile/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chatId: action.threadId || 'conv-1',
+        text: replyToSend,
+        accountId: action.accountId,
+      }),
+    }).catch((err) => console.warn('[SDR] Error despachando a Unipile:', err));
+
     setEditingActionId(null);
     setEditedReply("");
     refreshData();

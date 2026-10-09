@@ -99,6 +99,16 @@ export default function InboxPage() {
     const updated = sendMessageToConversation(activeConversation.id, text.trim());
     setConversations(updated);
     setMessageInput("");
+
+    // Sincronizar salida con LinkedIn vía Unipile
+    fetch("/api/unipile/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatId: activeConversation.id,
+        text: text.trim(),
+      }),
+    }).catch((err) => console.warn("[Inbox] Error enviando a Unipile:", err));
   };
 
   const handleSelectAiSuggestion = (suggestion: string) => {

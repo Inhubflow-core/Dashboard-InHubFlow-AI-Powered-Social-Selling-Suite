@@ -264,6 +264,13 @@ export function saveStoredPendingActions(actions: SdrPendingAction[]): void {
   localStorage.setItem(SDR_PENDING_KEY, JSON.stringify(actions));
 }
 
+export function addStoredPendingAction(action: SdrPendingAction): void {
+  if (typeof window === "undefined") return;
+  const current = getStoredPendingActions();
+  const updated = [action, ...current];
+  saveStoredPendingActions(updated);
+}
+
 export function getStoredDecisionLogs(): SdrDecisionLog[] {
   if (typeof window === "undefined") return INITIAL_DECISION_LOGS;
   const raw = localStorage.getItem(SDR_LOGS_KEY);

@@ -392,11 +392,47 @@ El módulo del Asistente SDR IA (`/sdr`) replica fielmente el motor conversacion
 
 ---
 
+### 7.4 Arquitectura de Integración de Unipile (Cliente de Producción & Sandbox de Alta Fidelidad)
+
+Para garantizar que el usuario pueda probar, ajustar y certificar la totalidad de la plataforma antes de consumir sus 7 días de prueba gratuitos de Unipile, se ha implementado una arquitectura de dos capas idéntica técnicamente a `inhubflow-b2b`:
+
+1. **Librería de Producción de Alta Fidelidad (`src/lib/unipile/`)**:
+   * Portado íntegro de tipos TypeScript (`types.ts`) y cliente (`client.ts`) con 549 líneas de lógica validada en producción.
+   * Métodos implementados:
+     * **Autenticación**: `getHostedAuthLink()`, `startCredentialsAuth()`, `solveCheckpoint()`.
+     * **Gestión de Cuentas**: `listAccounts()`, `getAccount()`, `deleteAccount()`, `getOwnProfile()`, `resolveProfile()`.
+     * **Signal Radar**: `getUserPosts()`, `getPost()`, `getPostComments()`, `getPostReactions()`, `reactToPost()`, `commentOnPost()`, `createPost()`.
+     * **Mensajería**: `listChats()`, `listMessages()`, `listChatAttendees()`, `listAccountMessages()`, `startChat()`, `sendMessage()`.
+     * **Prospección**: `sendInvitation()`, `followUser()`, `searchLinkedIn()`, `listLinkedInSearchParameters()`.
+
+2. **Modo Sandbox / Emulación Cero-Costo**:
+   * Si no se configuran credenciales en el archivo `.env` (`UNIPILE_DSN` o `UNIPILE_API_KEY`), el cliente entra en modo Sandbox transparente.
+   * Emula las respuestas HTTP 200/201 reales con contratos JSON idénticos a los de Unipile.
+   * Permite probar la interfaz completa, enviar mensajes y capturar leads sin gastar un solo segundo ni cuota de los 7 días de prueba.
+   * En cuanto se ingresan las credenciales reales en producción, la plataforma pasa a comunicarse en vivo con LinkedIn sin requerir modificaciones en el código.
+
+### 7.5 Receptor de Webhooks, Validación Criptográfica HMAC e Inyector de Pruebas
+
+1. **Endpoint Oficial de Webhook (`/api/unipile/webhook`)**:
+   * Recibe eventos en tiempo real enviados por Unipile:
+     * `message_received`: Mensajes entrantes de LinkedIn inyectados en tiempo real al Inbox y clasificados por el Asistente SDR IA.
+     * `invitation_accepted` / `new_relation`: Actualiza el grado de relación a 1er grado y despierta las secuencias de Social Selling.
+     * `comment_received`: Si coincide con palabras clave del Signal Radar (ej. "SISTEMA"), captura al lead automáticamente.
+     * `account_status_changed`: Actualiza la salud de las cuentas en el store multi-tenant.
+   * Validación criptográfica HMAC-SHA256 (`verifyUnipileSignature`) con tolerancia temporal de 300 segundos.
+
+2. **Simulador y Testeador en Vivo (`/support/docs` y `/api/unipile/simulate-event`)**:
+   * Panel visual e interactivo donde el usuario puede disparar con un clic 4 escenarios reales: mensaje entrante, invitación aceptada, comentario en post y cambio de estado de cuenta.
+   * Permite certificar el funcionamiento de extremo a extremo sin dependencia de conexiones externas.
+
+---
+
 ## 8. Próximos Pasos para Ejecución
 
 1. **Revisión del Template**: Verificar dependencias y estructura de `nextjs-admin-dashboard-main`.
 2. **Integración de Identidad**: Aplicar el color primario `#0099ff` y configurar la navegación con los 6 módulos más Administración SaaS.
 3. **Desarrollo del Canvas n8n**: Montar el lienzo `@xyflow/react` para el módulo de Campañas.
-4. **Integración con Servicios Técnicos de `inhubflow-b2b`**: Conectar el cliente Unipile, los escáneres de señales y el motor de multislots.
+4. **Integración con Servicios Técnicos de `inhubflow-b2b`**: Cliente Unipile, Sandbox de prueba y Receptor de Webhooks 100% operativos.
 5. **Generador de Carruseles y Radar Viral**: Implementar la suite de contenido del Módulo 1.
+
 

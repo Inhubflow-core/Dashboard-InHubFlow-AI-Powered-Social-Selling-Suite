@@ -75,6 +75,22 @@ export function getStoredSignalLeads(): SignalLeadItem[] {
   }
 }
 
+export function saveStoredSignalLeads(leads: SignalLeadItem[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
+  } catch {
+    // ignore
+  }
+}
+
+export function addStoredSignalLead(lead: SignalLeadItem): void {
+  if (typeof window === "undefined") return;
+  const current = getStoredSignalLeads();
+  const updated = [lead, ...current];
+  saveStoredSignalLeads(updated);
+}
+
 export function useSignalRadar() {
   const [l1Monitors, setL1Monitors] = useState<Level1Monitor[]>([]);
   const [l2Monitors, setL2Monitors] = useState<Level2CompetitorMonitor[]>([]);
