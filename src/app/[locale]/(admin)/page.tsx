@@ -1,5 +1,6 @@
 import ComponentCard from "@/components/common/ComponentCard";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import LineChartOne from "@/components/charts/line/LineChartOne";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -102,6 +103,14 @@ export default function SocialSellingDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Grafico de Evolucion y Traccion (Line Chart 1) */}
+      <ComponentCard
+        title="Line Chart 1"
+        desc="Evolucion temporal de interacciones y captacion de leads en LinkedIn."
+      >
+        <LineChartOne />
+      </ComponentCard>
 
       <div>
         <div className="mb-4 flex items-center justify-between">

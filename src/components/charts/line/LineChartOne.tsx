@@ -8,17 +8,29 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-export default function LineChartOne() {
+interface LineChartOneProps {
+  colors?: string[];
+  series?: Array<{ name: string; data: number[] }>;
+  categories?: string[];
+  height?: number;
+}
+
+export default function LineChartOne({
+  colors = ["#0099ff", "#80ccff"],
+  series: customSeries,
+  categories: customCategories,
+  height = 310,
+}: LineChartOneProps = {}) {
   const options: ApexOptions = {
     legend: {
       show: false, // Hide legend
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#465FFF", "#9CB9FF"], // Define line colors
+    colors: colors, // Define line colors
     chart: {
       fontFamily: "Outfit, sans-serif",
-      height: 310,
+      height: height,
       width: "100%",
       type: "line", // Set the chart type to 'line'
       toolbar: {
@@ -68,7 +80,7 @@ export default function LineChartOne() {
     },
     xaxis: {
       type: "category", // Category-based x-axis
-      categories: [
+      categories: customCategories || [
         "Jan",
         "Feb",
         "Mar",
@@ -108,13 +120,13 @@ export default function LineChartOne() {
     },
   };
 
-  const series = [
+  const series = customSeries || [
     {
-      name: "Sales",
+      name: "Interacciones",
       data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
     },
     {
-      name: "Revenue",
+      name: "Leads Captados",
       data: [40, 30, 50, 40, 55, 40, 70, 100, 110, 120, 150, 140],
     },
   ];
@@ -125,7 +137,7 @@ export default function LineChartOne() {
           options={options}
           series={series}
           type="area"
-          height={310}
+          height={height}
         />
       </div>
     </div>
