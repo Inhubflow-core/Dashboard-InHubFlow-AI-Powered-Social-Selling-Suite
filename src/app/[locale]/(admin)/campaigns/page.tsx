@@ -5,6 +5,16 @@ import { customNodeTypes } from "@/lib/campaigns/custom-nodes";
 import { getStoredWorkflow, saveStoredWorkflow } from "@/lib/campaigns/store";
 import { availablePaletteNodes, defaultCampaignEdges, defaultCampaignNodes } from "@/lib/campaigns/templates";
 import type { CampaignWorkflow, NodeConfigData } from "@/lib/campaigns/types";
+import type { CampaignExecutionLog } from "@/lib/campaigns/runner";
+import {
+  Play,
+  Terminal,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  Shield,
+  Layers,
+} from "lucide-react";
 import {
   addEdge,
   applyEdgeChanges,
@@ -29,6 +39,10 @@ export default function CampaignsPage() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isSavedMessage, setIsSavedMessage] = useState(false);
   const [showPacingModal, setShowPacingModal] = useState(false);
+  const [showRunnerLogsModal, setShowRunnerLogsModal] = useState(false);
+  const [isExecutingTest, setIsExecutingTest] = useState(false);
+  const [runnerLogs, setRunnerLogs] = useState<CampaignExecutionLog[]>([]);
+  const [runnerNotice, setRunnerNotice] = useState<string | null>(null);
 
   // Cargar campaña guardada
   useEffect(() => {
@@ -144,6 +158,44 @@ export default function CampaignsPage() {
     }
   };
 
+  const handleTriggerRunnerTest = async () => {
+    setIsExecutingTest(true);
+    try {
+      const res = await fetch("/api/campaigns/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leadName: "Mariana Costa",
+          linkedinUrl: "https://www.linkedin.com/in/mariana-costa-tech",
+          connectionDegree: "2nd",
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setRunnerNotice(data.result?.log?.message || "Paso de campaña ejecutado con exito.");
+        setTimeout(() => setRunnerNotice(null), 4000);
+        // Cargar logs actualizados
+        fetch("/api/campaigns/run")
+          .then((r) => r.json())
+          .then((d) => setRunnerLogs(d.logs || []));
+      }
+    } catch (err) {
+      console.warn("[Runner] Error:", err);
+    } finally {
+      setIsExecutingTest(false);
+    }
+  };
+
+  const handleOpenRunnerLogs = () => {
+    fetch("/api/campaigns/run")
+      .then((r) => r.json())
+      .then((d) => {
+        setRunnerLogs(d.logs || []);
+        setShowRunnerLogsModal(true);
+      })
+      .catch(() => setShowRunnerLogsModal(true));
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] space-y-3">
       {/* Barra Superior de la Campaña */}
@@ -156,6 +208,13 @@ export default function CampaignsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {runnerNotice && (
+            <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
+              <CheckCircle2 className="size-3.5" />
+              {runnerNotice}
+            </span>
+          )}
+
           {isSavedMessage && (
             <span className="text-xs font-semibold text-green-600 dark:text-green-400">
               Flujo Guardado Exitosamente
@@ -164,8 +223,27 @@ export default function CampaignsPage() {
 
           <button
             type="button"
+            onClick={handleTriggerRunnerTest}
+            disabled={isExecutingTest}
+            className="flex items-center gap-1.5 rounded-lg bg-[#0099ff]/10 border border-[#0099ff]/20 px-3 py-1.5 text-xs font-bold text-[#0099ff] hover:bg-[#0099ff]/20 transition disabled:opacity-50"
+          >
+            <Play className="size-3.5 fill-current" />
+            <span>{isExecutingTest ? "Ejecutando..." : "Simular Lead en Runner"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenRunnerLogs}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+          >
+            <Terminal className="size-3.5 text-gray-500" />
+            <span>Logs del Runner</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setShowPacingModal(true)}
-            className="rounded-lg border border-brand-300 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100 dark:bg-brand-950 dark:border-brand-900 dark:text-brand-300"
+            className="rounded-lg border border-[#0099ff]/30 bg-[#0099ff]/5 px-3 py-1.5 text-xs font-semibold text-[#0099ff] hover:bg-[#0099ff]/10 dark:bg-brand-950 dark:border-brand-900 dark:text-brand-300"
           >
             Pacing: {workflow?.dailyInvitationLimit || 25} Inv / {workflow?.dailyDmLimit || 40} DMs
           </button>
@@ -181,7 +259,7 @@ export default function CampaignsPage() {
           <button
             type="button"
             onClick={handleSaveWorkflow}
-            className="rounded-lg bg-brand-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-600 transition"
+            className="rounded-lg bg-[#0099ff] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#0088ee] transition shadow-sm"
           >
             Guardar Flujo
           </button>
@@ -498,6 +576,87 @@ export default function CampaignsPage() {
                 className="rounded-lg bg-brand-500 px-5 py-2 text-xs font-semibold text-white hover:bg-brand-600 transition"
               >
                 Guardar Parametros de Seguridad
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Logs del Campaign Runner */}
+      {showRunnerLogsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900 border border-gray-200 dark:border-gray-800 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-[#0099ff]/10 text-[#0099ff]">
+                  <Terminal className="size-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                    Logs de Auditoría del Campaign Runner ({runnerLogs.length})
+                  </h3>
+                  <p className="text-[11px] text-gray-500">
+                    Historial de ejecución de nodos, llamadas a Unipile y controles de pacing en vivo.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRunnerLogsModal(false)}
+                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="max-h-[380px] overflow-y-auto space-y-2.5 font-mono text-xs">
+              {runnerLogs.length === 0 ? (
+                <div className="py-8 text-center text-gray-400 font-sans text-xs">
+                  No hay registros de ejecución recientes. Haz clic en "Simular Lead en Runner" para iniciar una prueba.
+                </div>
+              ) : (
+                runnerLogs.map((log) => (
+                  <div
+                    key={log.id}
+                    className="rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-gray-800 dark:bg-gray-950/60"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                            log.status === "success"
+                              ? "bg-emerald-500/10 text-emerald-600"
+                              : log.status === "rate_limited"
+                              ? "bg-amber-500/10 text-amber-600"
+                              : log.status === "delayed"
+                              ? "bg-blue-500/10 text-blue-600"
+                              : "bg-red-500/10 text-red-600"
+                          }`}
+                        >
+                          {log.status.toUpperCase()}
+                        </span>
+                        <span className="font-semibold text-gray-900 dark:text-white">
+                          {log.nodeLabel}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-gray-400">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p className="mt-1 font-sans text-xs text-gray-600 dark:text-gray-300">
+                      {log.message}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setShowRunnerLogsModal(false)}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+              >
+                Cerrar
               </button>
             </div>
           </div>

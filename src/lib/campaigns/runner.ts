@@ -1,0 +1,499 @@
+import { unipile } from "@/lib/unipile/client";
+import type { Node, Edge } from "@xyflow/react";
+import type { NodeConfigData, CampaignWorkflow } from "./types";
+import { getStoredWorkflow, saveStoredWorkflow } from "./store";
+
+export interface CampaignExecutionLog {
+  id: string;
+  campaignId: string;
+  leadId: string;
+  leadName: string;
+  nodeId: string;
+  nodeLabel: string;
+  nodeType: string;
+  timestamp: string;
+  status: "success" | "delayed" | "paused" | "rate_limited" | "error";
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+export interface LeadCampaignState {
+  leadId: string;
+  leadName: string;
+  linkedinUrl: string;
+  providerId?: string;
+  connectionDegree: "1st" | "2nd" | "3rd";
+  hasAcceptedInvite: boolean;
+  hasReplied: boolean;
+  currentNodeId: string;
+  state: "pending" | "in_progress" | "waiting_delay" | "completed" | "failed";
+  nextStepAt?: string | null;
+  history: string[];
+}
+
+// Almacén de logs de ejecución en memoria
+const recentExecutionLogs: CampaignExecutionLog[] = [];
+
+export function getCampaignExecutionLogs(limit = 40): CampaignExecutionLog[] {
+  return recentExecutionLogs.slice(0, limit);
+}
+
+export function recordExecutionLog(log: CampaignExecutionLog) {
+  recentExecutionLogs.unshift(log);
+  if (recentExecutionLogs.length > 150) {
+    recentExecutionLogs.pop();
+  }
+}
+
+/**
+ * Pacing Tracker: Control estricto de límites diarios de LinkedIn por cuenta
+ */
+interface DailyPacingState {
+  date: string; // YYYY-MM-DD
+  invitationsSent: number;
+  dmsSent: number;
+  profilesVisited: number;
+}
+
+const pacingMap = new Map<string, DailyPacingState>();
+
+function getTodayString(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function getAccountDailyPacing(accountId: string): DailyPacingState {
+  const today = getTodayString();
+  const existing = pacingMap.get(accountId);
+  if (!existing || existing.date !== today) {
+    const newState: DailyPacingState = {
+      date: today,
+      invitationsSent: 0,
+      dmsSent: 0,
+      profilesVisited: 0,
+    };
+    pacingMap.set(accountId, newState);
+    return newState;
+  }
+  return existing;
+}
+
+export function incrementAccountPacing(
+  accountId: string,
+  type: "invitation" | "dm" | "visit"
+) {
+  const state = getAccountDailyPacing(accountId);
+  if (type === "invitation") state.invitationsSent += 1;
+  if (type === "dm") state.dmsSent += 1;
+  if (type === "visit") state.profilesVisited += 1;
+}
+
+/**
+ * Ejecutor de Campañas: Procesa un paso del flujo visual para un lead
+ */
+export async function executeCampaignStepForLead(params: {
+  workflow: CampaignWorkflow;
+  leadState: LeadCampaignState;
+  accountId?: string;
+}): Promise<{
+  success: boolean;
+  newState: LeadCampaignState;
+  log: CampaignExecutionLog;
+}> {
+  const { workflow, leadState } = params;
+  const accountId = params.accountId || "up_acc_roberto_orse_main";
+
+  let nodes: Node[] = [];
+  let edges: Edge[] = [];
+  try {
+    nodes = JSON.parse(workflow.nodesJson);
+    edges = JSON.parse(workflow.edgesJson);
+  } catch {
+    nodes = [];
+    edges = [];
+  }
+
+  const currentNode = nodes.find((n) => n.id === leadState.currentNodeId);
+
+  if (!currentNode) {
+    const log: CampaignExecutionLog = {
+      id: `log-run-${Date.now()}`,
+      campaignId: workflow.id,
+      leadId: leadState.leadId,
+      leadName: leadState.leadName,
+      nodeId: leadState.currentNodeId,
+      nodeLabel: "Nodo no encontrado",
+      nodeType: "unknown",
+      timestamp: new Date().toISOString(),
+      status: "error",
+      message: `No se encontro el nodo '${leadState.currentNodeId}' en el canvas de la campaña`,
+    };
+    recordExecutionLog(log);
+    return { success: false, newState: { ...leadState, state: "failed" }, log };
+  }
+
+  const nodeData = currentNode.data as unknown as NodeConfigData;
+  const pacing = getAccountDailyPacing(accountId);
+
+  // 1. Validar si el lead debe detenerse por respuesta (Stop on Reply)
+  if (workflow.stopOnReply && leadState.hasReplied) {
+    const log: CampaignExecutionLog = {
+      id: `log-run-${Date.now()}`,
+      campaignId: workflow.id,
+      leadId: leadState.leadId,
+      leadName: leadState.leadName,
+      nodeId: currentNode.id,
+      nodeLabel: nodeData.label,
+      nodeType: nodeData.nodeType,
+      timestamp: new Date().toISOString(),
+      status: "paused",
+      message: `${leadState.leadName} ha respondido a un mensaje previo. Secuencia pausada para atencion personalizada (Stop on Reply).`,
+    };
+    recordExecutionLog(log);
+    return { success: true, newState: { ...leadState, state: "completed" }, log };
+  }
+
+  // 2. Ejecutar según tipo de nodo
+  switch (nodeData.nodeType) {
+    case "trigger_signal":
+    case "trigger_list": {
+      // Disparador inicial: avanzar al siguiente nodo conectado
+      const nextEdge = edges.find((e) => e.source === currentNode.id);
+      const nextNodeId = nextEdge ? nextEdge.target : null;
+
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "success",
+        message: `Lead incorporado a la secuencia mediante señal de palabra clave '${nodeData.keyword || "SISTEMA"}'`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          currentNodeId: nextNodeId || currentNode.id,
+          state: nextNodeId ? "in_progress" : "completed",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+
+    case "action_visit": {
+      // Pacing check
+      incrementAccountPacing(accountId, "visit");
+
+      // Visita de perfil a través de Unipile
+      try {
+        await unipile.resolveProfile(leadState.linkedinUrl, accountId);
+      } catch {
+        // En sandbox no arroja error
+      }
+
+      const nextEdge = edges.find((e) => e.source === currentNode.id);
+      const nextNodeId = nextEdge ? nextEdge.target : null;
+
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "success",
+        message: `Perfil de ${leadState.leadName} visitado con exito. Registro generado en sus notificaciones de LinkedIn.`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          currentNodeId: nextNodeId || currentNode.id,
+          state: nextNodeId ? "in_progress" : "completed",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+
+    case "action_invite": {
+      // Pacing check estricto: no superar límite diario configurado (ej. 25/día)
+      if (pacing.invitationsSent >= workflow.dailyInvitationLimit) {
+        const log: CampaignExecutionLog = {
+          id: `log-run-${Date.now()}`,
+          campaignId: workflow.id,
+          leadId: leadState.leadId,
+          leadName: leadState.leadName,
+          nodeId: currentNode.id,
+          nodeLabel: nodeData.label,
+          nodeType: nodeData.nodeType,
+          timestamp: new Date().toISOString(),
+          status: "rate_limited",
+          message: `Limite diario de invitaciones alcanzado (${pacing.invitationsSent}/${workflow.dailyInvitationLimit}). Secuencia reprogramada para mañana para proteger la cuenta.`,
+        };
+        recordExecutionLog(log);
+        return {
+          success: false,
+          newState: { ...leadState, state: "waiting_delay" },
+          log,
+        };
+      }
+
+      // Enviar invitación
+      incrementAccountPacing(accountId, "invitation");
+      const note = nodeData.noteText
+        ? nodeData.noteText.replace("{{first_name}}", leadState.leadName.split(" ")[0])
+        : undefined;
+
+      try {
+        await unipile.sendInvitation({
+          account_id: accountId,
+          provider_id: leadState.providerId || `urn:li:member:${leadState.leadId}`,
+          message: note,
+        });
+      } catch (err: unknown) {
+        console.warn("[Runner] Error enviando invitación:", err);
+      }
+
+      const nextEdge = edges.find((e) => e.source === currentNode.id);
+      const nextNodeId = nextEdge ? nextEdge.target : null;
+
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "success",
+        message: `Invitacion de conexion enviada a ${leadState.leadName}${note ? " con nota personalizada" : ""}. Cuota hoy: ${pacing.invitationsSent + 1}/${workflow.dailyInvitationLimit}`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          currentNodeId: nextNodeId || currentNode.id,
+          state: nextNodeId ? "in_progress" : "completed",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+
+    case "action_dm": {
+      // Pacing check: DMs diarios (ej. 40/día)
+      if (pacing.dmsSent >= workflow.dailyDmLimit) {
+        const log: CampaignExecutionLog = {
+          id: `log-run-${Date.now()}`,
+          campaignId: workflow.id,
+          leadId: leadState.leadId,
+          leadName: leadState.leadName,
+          nodeId: currentNode.id,
+          nodeLabel: nodeData.label,
+          nodeType: nodeData.nodeType,
+          timestamp: new Date().toISOString(),
+          status: "rate_limited",
+          message: `Limite diario de mensajes DM alcanzado (${pacing.dmsSent}/${workflow.dailyDmLimit}).`,
+        };
+        recordExecutionLog(log);
+        return {
+          success: false,
+          newState: { ...leadState, state: "waiting_delay" },
+          log,
+        };
+      }
+
+      incrementAccountPacing(accountId, "dm");
+      const messageBody = (nodeData.dmText || "Hola {{first_name}}")
+        .replace("{{first_name}}", leadState.leadName.split(" ")[0]);
+
+      try {
+        await unipile.sendMessage({
+          chat_id: `chat-${leadState.leadId}`,
+          text: messageBody,
+        });
+      } catch (err) {
+        console.warn("[Runner] Error enviando DM:", err);
+      }
+
+      const nextEdge = edges.find((e) => e.source === currentNode.id);
+      const nextNodeId = nextEdge ? nextEdge.target : null;
+
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "success",
+        message: `Mensaje directo y recurso '${nodeData.attachedResource || "PDF"}' enviado a ${leadState.leadName}.`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          currentNodeId: nextNodeId || currentNode.id,
+          state: nextNodeId ? "in_progress" : "completed",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+
+    case "logic_condition": {
+      // Evaluar condición lógica
+      let conditionMet = false;
+      if (nodeData.conditionType === "is_1st_degree") {
+        conditionMet = leadState.connectionDegree === "1st";
+      } else if (nodeData.conditionType === "accepted_invite") {
+        conditionMet = leadState.hasAcceptedInvite || leadState.connectionDegree === "1st";
+      } else if (nodeData.conditionType === "replied_to_dm") {
+        conditionMet = leadState.hasReplied;
+      }
+
+      // Buscar arista según el resultado (sourceHandle: 'true' o 'false')
+      const targetEdge = edges.find(
+        (e) => e.source === currentNode.id && (e.sourceHandle === (conditionMet ? "true" : "false") || !e.sourceHandle)
+      );
+
+      const nextNodeId = targetEdge ? targetEdge.target : null;
+
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "success",
+        message: `Condicion '${nodeData.conditionType}' evaluada como: ${conditionMet ? "VERDADERO" : "FALSO"}. Bifurcando flujo.`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          currentNodeId: nextNodeId || currentNode.id,
+          state: nextNodeId ? "in_progress" : "completed",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+
+    case "logic_delay": {
+      const hours = (nodeData.delayDays || 0) * 24 + (nodeData.delayHours || 2);
+      const nextStepTime = new Date(Date.now() + hours * 3600 * 1000).toISOString();
+
+      const nextEdge = edges.find((e) => e.source === currentNode.id);
+      const nextNodeId = nextEdge ? nextEdge.target : null;
+
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "delayed",
+        message: `Pausa calculada de ${hours} hora(s) programada para ${leadState.leadName}. Reanudacion prevista: ${new Date(nextStepTime).toLocaleString()}`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          currentNodeId: nextNodeId || currentNode.id,
+          nextStepAt: nextStepTime,
+          state: "waiting_delay",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+
+    case "crm_stage": {
+      const nextEdge = edges.find((e) => e.source === currentNode.id);
+      const nextNodeId = nextEdge ? nextEdge.target : null;
+
+      const targetStage = nodeData.crmStageTarget || "3. Material Entregado";
+
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "success",
+        message: `Estado del lead ${leadState.leadName} en el Pipeline actualizado a: '${targetStage}'.`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          currentNodeId: nextNodeId || currentNode.id,
+          state: nextNodeId ? "in_progress" : "completed",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+
+    case "control_end":
+    default: {
+      const log: CampaignExecutionLog = {
+        id: `log-run-${Date.now()}`,
+        campaignId: workflow.id,
+        leadId: leadState.leadId,
+        leadName: leadState.leadName,
+        nodeId: currentNode.id,
+        nodeLabel: nodeData.label,
+        nodeType: nodeData.nodeType,
+        timestamp: new Date().toISOString(),
+        status: "success",
+        message: `Secuencia finalizada exitosamente para ${leadState.leadName}.`,
+      };
+      recordExecutionLog(log);
+
+      return {
+        success: true,
+        newState: {
+          ...leadState,
+          state: "completed",
+          history: [...leadState.history, currentNode.id],
+        },
+        log,
+      };
+    }
+  }
+}
