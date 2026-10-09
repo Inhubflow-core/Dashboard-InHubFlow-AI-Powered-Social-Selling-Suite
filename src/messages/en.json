@@ -12,15 +12,23 @@
   "sidebar": {
     "groups": {
       "menu": "Menu",
-      "support": "Support",
       "saas": "Administración SaaS",
-      "others": "Others"
+      "settings": "Configuración",
+      "support": "Soporte, Ayuda & Recursos"
     },
     "badges": {
       "new": "new",
       "pro": "pro"
     },
     "items": {
+      "settings": "Configuración",
+      "workspaceSettings": "Ajustes del Workspace",
+      "securitySettings": "API Keys & Seguridad",
+      "support": "Soporte & Ayuda",
+      "helpCenter": "Centro de Ayuda & Guías",
+      "tickets": "Tickets de Soporte",
+      "docs": "Documentación & APIs",
+      "systemStatus": "Estado del Sistema",
       "dashboard": "Panel de Control",
       "viralPosts": "Viral Post Engine",
       "viralRadar": "Radar Viral",

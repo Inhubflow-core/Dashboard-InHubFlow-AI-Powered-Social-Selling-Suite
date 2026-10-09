@@ -7,7 +7,17 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/context/AuthContext";
-import { Users, CreditCard, ShieldCheck, Bot } from "lucide-react";
+import {
+  Users,
+  CreditCard,
+  ShieldCheck,
+  Bot,
+  Settings,
+  LifeBuoy,
+  Ticket,
+  FileCode,
+  Activity,
+} from "lucide-react";
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -119,34 +129,37 @@ const saasAdminItems: NavItem[] = [
   },
 ];
 
-const othersItems: NavItem[] = [
+const settingsItems: NavItem[] = [
   {
-    icon: <PieChartIcon />,
-    key: "charts",
+    icon: <Settings className="size-5" />,
+    key: "settings",
     subItems: [
-      { key: "lineChart", path: "/line-chart", pro: false },
-      { key: "barChart", path: "/bar-chart", pro: false },
+      { key: "workspaceSettings", path: "/settings" },
+      { key: "securitySettings", path: "/settings/security" },
     ],
   },
+];
+
+const supportItems: NavItem[] = [
   {
-    icon: <BoxCubeIcon />,
-    key: "uiElements",
-    subItems: [
-      { key: "alerts", path: "/alerts" },
-      { key: "avatar", path: "/avatars" },
-      { key: "badge", path: "/badge" },
-      { key: "buttons", path: "/buttons" },
-      { key: "images", path: "/images" },
-      { key: "videos", path: "/videos" },
-    ],
+    icon: <LifeBuoy className="size-5" />,
+    key: "helpCenter",
+    path: "/support/help-center",
   },
   {
-    icon: <PlugInIcon />,
-    key: "authentication",
-    subItems: [
-      { key: "signIn", path: "/signin", pro: false },
-      { key: "signUp", path: "/signup", pro: false },
-    ],
+    icon: <Ticket className="size-5" />,
+    key: "tickets",
+    path: "/support/tickets",
+  },
+  {
+    icon: <FileCode className="size-5" />,
+    key: "docs",
+    path: "/support/docs",
+  },
+  {
+    icon: <Activity className="size-5" />,
+    key: "systemStatus",
+    path: "/support/system-status",
   },
 ];
 
@@ -164,9 +177,11 @@ const AppSidebar: React.FC = () => {
     return navItems;
   }, [isMember]);
 
+  type MenuType = "main" | "settings" | "support";
+
   const renderMenuItems = (
     navItems: NavItem[],
-    menuType: "main" | "support" | "others",
+    menuType: MenuType,
   ) => (
     <ul className="flex flex-col gap-1">
       {navItems.map((nav, index) => (
@@ -313,7 +328,7 @@ const AppSidebar: React.FC = () => {
   );
 
   const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "support" | "others";
+    type: MenuType;
     index: number;
   } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
@@ -328,16 +343,17 @@ const AppSidebar: React.FC = () => {
   useEffect(() => {
     // Check if the current path matches any submenu item
     let submenuMatched = false;
-    ["main", "support", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
+    const menuConfigs: Array<{ type: MenuType; items: NavItem[] }> = [
+      { type: "main", items: visibleNavItems },
+      { type: "settings", items: settingsItems },
+      { type: "support", items: supportItems },
+    ];
+    menuConfigs.forEach(({ type, items }) => {
       items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
             if (isActive(subItem.path)) {
-              setOpenSubmenu({
-                type: menuType as "main" | "support" | "others",
-                index,
-              });
+              setOpenSubmenu({ type, index });
               submenuMatched = true;
             }
           });
@@ -349,7 +365,7 @@ const AppSidebar: React.FC = () => {
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [pathname, isActive]);
+  }, [pathname, isActive, visibleNavItems]);
 
   useEffect(() => {
     // Set the height of the submenu items when the submenu is opened
@@ -366,7 +382,7 @@ const AppSidebar: React.FC = () => {
 
   const handleSubmenuToggle = (
     index: number,
-    menuType: "main" | "support" | "others",
+    menuType: MenuType,
   ) => {
     setOpenSubmenu((prevOpenSubmenu) => {
       if (
@@ -482,6 +498,27 @@ const AppSidebar: React.FC = () => {
               </div>
             )}
 
+            {/* Grupo Configuración */}
+            {!isMember && (
+              <div>
+                <h2
+                  className={`mb-4 flex text-xs leading-5 text-gray-400 uppercase ${
+                    !isExpanded && !isHovered
+                      ? "xl:justify-center"
+                      : "justify-start"
+                  }`}
+                >
+                  {isExpanded || isHovered || isMobileOpen ? (
+                    t("groups.settings")
+                  ) : (
+                    <HorizontaLDots />
+                  )}
+                </h2>
+                {renderMenuItems(settingsItems, "settings")}
+              </div>
+            )}
+
+            {/* Grupo Soporte, Ayuda & Recursos */}
             <div>
               <h2
                 className={`mb-4 flex text-xs leading-5 text-gray-400 uppercase ${
@@ -491,12 +528,12 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  t("groups.others")
+                  t("groups.support")
                 ) : (
                   <HorizontaLDots />
                 )}
               </h2>
-              {renderMenuItems(othersItems, "others")}
+              {renderMenuItems(supportItems, "support")}
             </div>
           </div>
         </nav>
