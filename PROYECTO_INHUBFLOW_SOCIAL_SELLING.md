@@ -425,14 +425,40 @@ Para garantizar que el usuario pueda probar, ajustar y certificar la totalidad d
    * Panel visual e interactivo donde el usuario puede disparar con un clic 4 escenarios reales: mensaje entrante, invitación aceptada, comentario en post y cambio de estado de cuenta.
    * Permite certificar el funcionamiento de extremo a extremo sin dependencia de conexiones externas.
 
+### 7.6 Motor de Ejecución de Campañas (`Campaign Runner` & Límites de Pacing)
+
+1. **Lógica de Ejecución Automática (`src/lib/campaigns/runner.ts`)**:
+   * Recorre los nodos y aristas diseñados en el lienzo de `@xyflow/react` para cada lead activo.
+   * Modela y ejecuta 5 familias de nodos:
+     * **Disparadores**: Inicio por palabra clave en post o lista de prospectos.
+     * **Acciones**: Visita de perfil, envío de invitación de conexión y despacho de mensaje directo (DM) con recurso PDF.
+     * **Lógica & Bifurcación**: Evaluación condicional (`is_1st_degree`, `accepted_invite`, `replied_to_dm`) con ramificación en dos caminos (`true` / `false`).
+     * **Retardo Humano (Delays)**: Pausas configurables en horas o días que operan dentro del horario laboral (09:00 - 18:00).
+     * **Control de Seguridad**: Detención automática de la secuencia en cuanto el prospecto responde (*Stop on Reply*).
+   * **Pacing Diario Estricto**: Control de límites por cuenta (máximo 25 invitaciones y 40 DMs diarios) con jitter aleatorio para proteger los perfiles de LinkedIn contra bloqueos.
+   * **API & Consola de Auditoría**: Endpoint `/api/campaigns/run` y visor en vivo de logs accesible directamente desde el header de `/campaigns`.
+
+### 7.7 Pasarela de Facturación Recurrente (Lemon Squeezy Billing Webhook)
+
+1. **Provisión Automática de Multislots (`/api/webhooks/lemonsqueezy`)**:
+   * Valida firmas criptográficas HMAC-SHA256 en la cabecera `x-signature`.
+   * Procesa eventos de suscripción (`subscription_created`, `order_created`, `subscription_cancelled`).
+   * Asigna automáticamente los slots según el plan contratado:
+     * Plan Starter: 1 slot ($49/mes)
+     * Plan Growth: 5 slots ($149/mes)
+     * Plan Business: 10 slots ($279/mes)
+   * Soporta atribución automática para partners y códigos promocionales.
+
 ---
 
 ## 8. Próximos Pasos para Ejecución
 
-1. **Revisión del Template**: Verificar dependencias y estructura de `nextjs-admin-dashboard-main`.
-2. **Integración de Identidad**: Aplicar el color primario `#0099ff` y configurar la navegación con los 6 módulos más Administración SaaS.
-3. **Desarrollo del Canvas n8n**: Montar el lienzo `@xyflow/react` para el módulo de Campañas.
-4. **Integración con Servicios Técnicos de `inhubflow-b2b`**: Cliente Unipile, Sandbox de prueba y Receptor de Webhooks 100% operativos.
-5. **Generador de Carruseles y Radar Viral**: Implementar la suite de contenido del Módulo 1.
+1. **Revisión del Template**: Cumplido con estructura de Next.js App Router y Tailwind.
+2. **Integración de Identidad**: Color primario `#0099ff` activo en toda la plataforma.
+3. **Canvas n8n & Campaign Runner**: Lienzo `@xyflow/react` con motor de ejecución y control de pacing 100% implementado.
+4. **Integración Unipile & Sandbox Cero-Costo**: Cliente de 549 líneas, Webhooks HMAC y emulador interactivo operativos.
+5. **Generador de Carruseles y Viral Engine**: Editor con exportación a PDF y programación en calendario activo.
+6. **Pasarela de Facturación**: Webhook de aprovisionamiento de Lemon Squeezy listo para producción.
+
 
 
