@@ -13,6 +13,7 @@
     "groups": {
       "menu": "Menu",
       "support": "Support",
+      "saas": "Administración SaaS",
       "others": "Others"
     },
     "badges": {
@@ -35,10 +36,15 @@
       "leadsDirectory": "Directorio de Leads",
       "leadsLists": "Listas por Señal",
       "inbox": "Inbox Unificado",
+      "sdrAgent": "Asistente SDR IA",
       "pipeline": "Pipeline CRM",
       "pipelineKanban": "Kanban Comercial",
       "pipelineCalendar": "Calendario de Citas",
       "linkedinAccounts": "Cuentas de LinkedIn",
+      "plans": "Planes & Slots",
+      "team": "Equipo & Miembros",
+      "saasAdmin": "Administración SaaS",
+      "saasSubscribers": "Suscriptores & Multislots",
       "ecommerceHome": "Ecommerce",
       "analytics": "Analytics",
       "marketing": "Marketing",

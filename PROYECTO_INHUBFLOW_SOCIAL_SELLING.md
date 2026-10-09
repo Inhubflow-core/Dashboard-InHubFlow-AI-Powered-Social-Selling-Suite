@@ -311,10 +311,67 @@ Flujo de estados visual con tarjetas arrastrables:
 
 ---
 
-## 6. Próximos Pasos para Ejecución
+## 7. Arquitectura SaaS, Sistema Multislots y Modelo de Roles
+
+Siguiendo el modelo validado en `inhubflow-b2b`, la plataforma opera bajo una arquitectura SaaS multi-tenant con control estricto de cupos (slots) de cuentas de LinkedIn conectables.
+
+### 7.1 Jerarquía de Roles
+1. **Super Admin (Roberto OrSe / inhubflow@gmail.com)**:
+   * Control maestro de toda la infraestructura y del SaaS.
+   * Capacidad ilimitada (999 slots asignados).
+   * Acceso exclusivo al **Panel de Administracion SaaS** (`/admin/subscribers`), donde puede auditar a todos los clientes, crear suscriptores manualmente, modificar planes/slots, suspender cuentas y alternar la vista a cualquier organizacion para soporte y auditoria.
+2. **Admin de Cuenta / Cliente (Tenant Admin / Workspace Owner)**:
+   * Cada suscriptor es el Administrador de su empresa/organizacion.
+   * Administra sus slots contratados (1, 5 o 10 perfiles).
+   * Puede invitar a operadores/colaboradores en el modulo de Equipo (`/team`) y asignarles cuentas especificas de su cuota.
+   * Al alcanzar el tope de slots contratados, el sistema bloquea nuevas vinculaciones y ofrece la opcion de upgrade de plan.
+
+### 7.2 Los 3 Planes Oficiales de Multislots
+
+| Parametro | Plan Starter | Plan Growth (Recomendado) | Plan Business |
+| :--- | :---: | :---: | :---: |
+| **Slots de LinkedIn** | **1 Cuenta Conectada** | **5 Cuentas Conectadas** | **10 Cuentas Conectadas** |
+| **Audiencia Objetivo** | Fundadores, consultores y creadores | Agencias en expansion y equipos SDR | Agencias consolidadas y grandes ventas |
+| **Operadores de Equipo** | 1 Usuario (Solo el Admin) | 1 Admin + hasta 5 miembros | 1 Admin + hasta 10 miembros |
+| **Viral Post Engine** | Completo (Texto, Imagen y PDF) | Ilimitado | Ilimitado con soporte prioritario |
+| **Signal Radar** | Nivel 1, 2 y 3 (Hasta 5 monitores) | Nivel 1, 2 y 3 (Hasta 20 monitores) | Monitores ilimitados en tiempo real |
+| **Campañas Activas** | Hasta 3 campanas simultaneas | Campanas ilimitadas | Campanas ilimitadas multi-cuenta |
+| **Pacing Humano** | Si (20-25 inv/dia, 30 DMs/dia) | Si (por cada cuenta conectada) | Si (con rotacion balanceada) |
+| **Precio Mensual** | $49 / mes | $149 / mes | $279 / mes |
+| **Precio Anual (-20%)** | $39 / mes | $119 / mes | $229 / mes |
+
+### 7.3 Asistente SDR IA (Réplica de la Arquitectura de `inhubflow-b2b`)
+
+El módulo del Asistente SDR IA (`/sdr`) replica fielmente el motor conversacional y de seguridad de `inhubflow-b2b`:
+
+1. **4 Modos Operativos Configurables**:
+   * **Desactivado (Off)**: Agente pausado sin procesar mensajes entrantes.
+   * **Modo Sombra (Shadow)**: Analiza y clasifica respuestas en segundo plano para medir efectividad sin enviar nada al lead.
+   * **Supervisión con Aprobación (Approval - Human-in-the-Loop)**: Modo por defecto. Genera borradores contextuales que se encolan para revisión humana de un solo clic.
+   * **Autónomo Seguro (Auto)**: Responde directamente en LinkedIn únicamente si la confianza supera el umbral configurado (ej. 85%) y el nivel de riesgo es bajo.
+
+2. **Clasificación Estructurada de Intenciones (Gemini 3.6 Flash)**:
+   * Detecta 14 intenciones comerciales: `interested`, `meeting_request`, `pricing_question`, `product_question`, `objection`, `integration_question`, `proposal_request`, `not_interested`, `unsubscribe`, `human_requested`, `referral`, `ooo`, `ambiguous` y `hostile_or_legal`.
+
+3. **Base de Conocimiento Aprobada (RAG Ligero)**:
+   * Evita alucinaciones comerciales limitando las respuestas a documentos aprobados en 5 categorías: Propuesta de Valor, Precios y Planes, Manejo de Objeciones, Protocolos de Reunión y Reglas de Handoff.
+
+4. **Cola de Aprobaciones Human-in-the-Loop**:
+   * Interfaz interactiva donde los operadores pueden aprobar y despachar a LinkedIn, editar el borrador, escalar a un humano o descartar la acción.
+
+5. **Puertas de Seguridad (Promotion Gates)**:
+   * 5 comprobaciones técnicas que certifican la salud del modelo, base de conocimiento y políticas de seguridad antes de habilitar el modo autónomo.
+
+6. **Simulador Interactivo (Playground)**:
+   * Consola de pruebas en tiempo real con latencia medida en milisegundos, citas de conocimiento aplicadas y resumen de razonamiento de la IA.
+
+---
+
+## 8. Próximos Pasos para Ejecución
 
 1. **Revisión del Template**: Verificar dependencias y estructura de `nextjs-admin-dashboard-main`.
-2. **Integración de Identidad**: Aplicar el color primario `#0099ff` y configurar la navegación con los 6 módulos.
+2. **Integración de Identidad**: Aplicar el color primario `#0099ff` y configurar la navegación con los 6 módulos más Administración SaaS.
 3. **Desarrollo del Canvas n8n**: Montar el lienzo `@xyflow/react` para el módulo de Campañas.
-4. **Integración con Servicios Técnicos de `inhubflow-b2b`**: Conectar el cliente Unipile y los escáneres de señales.
+4. **Integración con Servicios Técnicos de `inhubflow-b2b`**: Conectar el cliente Unipile, los escáneres de señales y el motor de multislots.
 5. **Generador de Carruseles y Radar Viral**: Implementar la suite de contenido del Módulo 1.
+

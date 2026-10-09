@@ -16,6 +16,7 @@ import type { ConnectedLinkedInAccount } from "@/lib/unipile/types";
 interface LinkedInAccountCardProps {
   account: ConnectedLinkedInAccount;
   isActive: boolean;
+  canManage?: boolean;
   onSelectActive: (id: string) => void;
   onDisconnect: (id: string) => void;
   onReconnect: (id: string) => void;
@@ -24,6 +25,7 @@ interface LinkedInAccountCardProps {
 export default function LinkedInAccountCard({
   account,
   isActive,
+  canManage = true,
   onSelectActive,
   onDisconnect,
   onReconnect,
@@ -62,10 +64,16 @@ export default function LinkedInAccountCard({
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
                 {account.name}
               </h4>
+              {account.assignedUserName && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#0099ff]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#0099ff]">
+                  <UserCheck className="size-3" />
+                  <span>{account.assignedUserName}</span>
+                </span>
+              )}
               {isActive && (
                 <span className="rounded-md bg-brand-50 px-2 py-0.5 text-[10px] font-bold text-brand-600 dark:bg-brand-950/40 dark:text-brand-300">
                   Activa para Prospeccion
@@ -117,14 +125,16 @@ export default function LinkedInAccountCard({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => onDisconnect(account.id)}
-            title="Desconectar cuenta"
-            className="rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50 hover:border-red-200 dark:border-gray-800 dark:hover:bg-red-950/20"
-          >
-            <Trash2 className="size-3.5" />
-          </button>
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => onDisconnect(account.id)}
+              title="Desconectar cuenta"
+              className="rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50 hover:border-red-200 dark:border-gray-800 dark:hover:bg-red-950/20"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

@@ -1,0 +1,239 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  X,
+  Check,
+  ShieldAlert,
+  Zap,
+  Building,
+  User,
+  ArrowRight,
+  Layers,
+} from "lucide-react";
+import { OFFICIAL_PLANS_LIST } from "@/lib/saas/plans";
+import type { PlanTier } from "@/lib/saas/types";
+import { useAuth } from "@/context/AuthContext";
+
+interface PlanUpgradeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  reason?: "capacity_reached" | "manual_upgrade";
+}
+
+export default function PlanUpgradeModal({
+  isOpen,
+  onClose,
+  reason = "capacity_reached",
+}: PlanUpgradeModalProps) {
+  const { currentUser, updateUserPlan, capacity } = useAuth();
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
+  const [successNotice, setSuccessNotice] = useState<string | null>(null);
+
+  if (!isOpen) return null;
+
+  const handleSelectPlan = (tier: PlanTier) => {
+    updateUserPlan(tier);
+    setSuccessNotice(`Plan actualizado exitosamente a ${tier.toUpperCase()}. Tus nuevos slots ya estan activos.`);
+    setTimeout(() => {
+      setSuccessNotice(null);
+      onClose();
+    }, 1800);
+  };
+
+  return (
+    <div className="fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto bg-gray-900/70 p-4 backdrop-blur-xs">
+      <div className="relative w-full max-w-5xl rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900 md:p-8">
+        {/* Botón Cerrar */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          aria-label="Cerrar modal"
+        >
+          <X className="size-5" />
+        </button>
+
+        {/* Encabezado */}
+        <div className="mb-6 text-center">
+          {reason === "capacity_reached" ? (
+            <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-500">
+              <ShieldAlert className="size-4" />
+              <span>Limite de slots alcanzado ({capacity.usedSlots} de {capacity.totalSlots} cuentas)</span>
+            </div>
+          ) : (
+            <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-[#0099ff]/30 bg-[#0099ff]/10 px-3 py-1 text-xs font-semibold text-[#0099ff]">
+              <Layers className="size-4" />
+              <span>Escala la capacidad de tu equipo</span>
+            </div>
+          )}
+
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
+            {reason === "capacity_reached"
+              ? "Amplia tus Slots de Cuentas de LinkedIn"
+              : "Selecciona el Plan Adecuado para tu Empresa"}
+          </h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Cada slot te permite conectar, automatizar y prospectar con un perfil activo de LinkedIn.
+          </p>
+
+          {/* Toggle Mensual / Anual */}
+          <div className="mt-5 inline-flex items-center rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-gray-800/60">
+            <button
+              onClick={() => setBillingCycle("monthly")}
+              className={`rounded-lg px-4 py-1.5 text-xs font-medium transition-colors ${
+                billingCycle === "monthly"
+                  ? "bg-white text-gray-900 shadow-xs dark:bg-gray-900 dark:text-white"
+                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              }`}
+            >
+              Facturacion Mensual
+            </button>
+            <button
+              onClick={() => setBillingCycle("annual")}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium transition-colors ${
+                billingCycle === "annual"
+                  ? "bg-[#0099ff] text-white shadow-xs"
+                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              }`}
+            >
+              <span>Facturacion Anual</span>
+              <span className="rounded bg-white/20 px-1 py-0.5 text-[10px] font-bold text-white">
+                -20%
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Notificación de éxito */}
+        {successNotice && (
+          <div className="mb-6 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-center text-sm font-medium text-emerald-500">
+            {successNotice}
+          </div>
+        )}
+
+        {/* Grid de los 3 Planes */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {OFFICIAL_PLANS_LIST.map((plan) => {
+            const isCurrent = currentUser.planTier === plan.id;
+            const price = billingCycle === "annual" ? plan.annualPrice : plan.monthlyPrice;
+
+            return (
+              <div
+                key={plan.id}
+                className={`relative flex flex-col rounded-2xl border p-6 transition-all ${
+                  plan.popular
+                    ? "border-[#0099ff] bg-gradient-to-b from-[#0099ff]/5 to-transparent shadow-lg dark:from-[#0099ff]/10"
+                    : "border-gray-200 bg-white hover:border-gray-300 dark:border-gray-800 dark:bg-gray-800/40"
+                }`}
+              >
+                {/* Badge Popular */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#0099ff] px-3 py-0.5 text-[11px] font-bold text-white uppercase tracking-wider">
+                    Recomendado
+                  </div>
+                )}
+
+                {/* Encabezado del Plan */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                      {plan.name}
+                    </span>
+                    {plan.id === "starter" && <User className="size-4 text-gray-400" />}
+                    {plan.id === "growth" && <Zap className="size-4 text-[#0099ff]" />}
+                    {plan.id === "business" && <Building className="size-4 text-[#0099ff]" />}
+                  </div>
+
+                  {/* Destacado de Slots */}
+                  <div className="mt-3 rounded-xl border border-gray-100 bg-gray-50 p-3 text-center dark:border-gray-800 dark:bg-gray-900/60">
+                    <div className="text-2xl font-extrabold text-[#0099ff]">
+                      {plan.slots} {plan.slots === 1 ? "Cuenta" : "Cuentas"}
+                    </div>
+                    <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                      {plan.slots === 1 ? "1 Slot simultaneo" : `${plan.slots} Slots simultaneos`}
+                    </div>
+                  </div>
+
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 min-h-[32px]">
+                    {plan.tagline}
+                  </p>
+
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                      ${price}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      / mes
+                    </span>
+                  </div>
+                </div>
+
+                {/* Lista de Características */}
+                <div className="mb-6 flex-1 space-y-2.5 border-t border-gray-100 pt-4 dark:border-gray-800">
+                  {plan.features.slice(0, 6).map((feat, idx) => (
+                    <div key={idx} className="flex items-start gap-2.5 text-xs">
+                      <div
+                        className={`mt-0.5 rounded-full p-0.5 ${
+                          feat.included
+                            ? feat.highlight
+                              ? "bg-[#0099ff] text-white"
+                              : "bg-[#0099ff]/10 text-[#0099ff]"
+                            : "bg-gray-100 text-gray-400 dark:bg-gray-800"
+                        }`}
+                      >
+                        <Check className="size-3" />
+                      </div>
+                      <span
+                        className={`${
+                          feat.included
+                            ? feat.highlight
+                              ? "font-semibold text-gray-900 dark:text-white"
+                              : "text-gray-600 dark:text-gray-300"
+                            : "text-gray-400 line-through dark:text-gray-600"
+                        }`}
+                      >
+                        {feat.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Botón de Selección */}
+                <button
+                  disabled={isCurrent}
+                  onClick={() => handleSelectPlan(plan.id)}
+                  className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition-all ${
+                    isCurrent
+                      ? "cursor-default border border-gray-200 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                      : plan.popular
+                      ? "bg-[#0099ff] text-white shadow-md shadow-[#0099ff]/20 hover:bg-[#0088e6]"
+                      : "border border-gray-200 bg-white text-gray-800 hover:border-[#0099ff] hover:text-[#0099ff] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                  }`}
+                >
+                  {isCurrent ? (
+                    "Plan Actual"
+                  ) : (
+                    <>
+                      <span>Seleccionar {plan.name}</span>
+                      <ArrowRight className="size-3.5" />
+                    </>
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Pie informativo */}
+        <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-gray-100 pt-4 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400 sm:flex-row">
+          <div>
+            Proteccion contra suspensiones con pacing humano y descansos aleatorios en todos los planes.
+          </div>
+          <div>
+            Necesitas mas de 10 cuentas? Contacta con soporte para una licencia Enterprise personalizada.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

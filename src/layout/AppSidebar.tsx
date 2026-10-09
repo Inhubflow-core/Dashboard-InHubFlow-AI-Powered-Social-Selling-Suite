@@ -4,8 +4,10 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/utils";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSidebar } from "../context/SidebarContext";
+import { useAuth } from "@/context/AuthContext";
+import { Users, CreditCard, ShieldCheck, Bot } from "lucide-react";
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -80,6 +82,11 @@ const navItems: NavItem[] = [
     path: "/inbox",
   },
   {
+    icon: <Bot className="size-5" />,
+    key: "sdrAgent",
+    path: "/sdr",
+  },
+  {
     icon: <TableIcon />,
     key: "pipeline",
     subItems: [
@@ -91,6 +98,24 @@ const navItems: NavItem[] = [
     icon: <PlugInIcon />,
     key: "linkedinAccounts",
     path: "/linkedin-accounts",
+  },
+  {
+    icon: <Users className="size-5" />,
+    key: "team",
+    path: "/team",
+  },
+  {
+    icon: <CreditCard className="size-5" />,
+    key: "plans",
+    path: "/plans",
+  },
+];
+
+const saasAdminItems: NavItem[] = [
+  {
+    icon: <ShieldCheck className="size-5" />,
+    key: "saasSubscribers",
+    path: "/admin/subscribers",
   },
 ];
 
@@ -127,8 +152,17 @@ const othersItems: NavItem[] = [
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { currentUser, isSuperAdmin } = useAuth();
   const pathname = usePathname();
   const t = useTranslations("sidebar");
+
+  const isMember = currentUser?.role === "member";
+  const visibleNavItems = useMemo(() => {
+    if (isMember) {
+      return navItems.filter((item) => item.key !== "team" && item.key !== "plans");
+    }
+    return navItems;
+  }, [isMember]);
 
   const renderMenuItems = (
     navItems: NavItem[],
@@ -426,8 +460,27 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots />
                 )}
               </h2>
-              {renderMenuItems(navItems, "main")}
+              {renderMenuItems(visibleNavItems, "main")}
             </div>
+
+            {isSuperAdmin && (
+              <div>
+                <h2
+                  className={`mb-4 flex text-xs leading-5 text-[#0099ff] font-bold uppercase ${
+                    !isExpanded && !isHovered
+                      ? "xl:justify-center"
+                      : "justify-start"
+                  }`}
+                >
+                  {isExpanded || isHovered || isMobileOpen ? (
+                    "Administración SaaS"
+                  ) : (
+                    <HorizontaLDots />
+                  )}
+                </h2>
+                {renderMenuItems(saasAdminItems, "main")}
+              </div>
+            )}
 
             <div>
               <h2

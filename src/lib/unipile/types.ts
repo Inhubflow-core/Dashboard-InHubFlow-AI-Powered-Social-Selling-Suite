@@ -87,6 +87,7 @@ export interface ConnectedLinkedInAccount {
   id: string;
   unipileAccountId: string;
   name: string;
+  email?: string;
   headline?: string;
   profilePictureUrl?: string;
   publicProfileUrl?: string;
@@ -94,6 +95,9 @@ export interface ConnectedLinkedInAccount {
   authMode: 'hosted' | 'credentials' | 'cookie';
   connectedAt: string;
   lastSyncAt: string;
+  ownerId?: string;
+  assignedUserId?: string | null;
+  assignedUserName?: string | null;
   dailyActionsCount?: {
     invitationsSent: number;
     messagesSent: number;
