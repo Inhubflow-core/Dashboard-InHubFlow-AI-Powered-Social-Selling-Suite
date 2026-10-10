@@ -395,7 +395,7 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Brand Header */}
-      <div className="flex shrink-0 h-16 items-center justify-center border-b border-gray-200 dark:border-gray-800 -mx-5 px-5 transition-all duration-300">
+      <div className="flex shrink-0 h-[76px] items-center justify-center border-b border-gray-200 dark:border-gray-800 -mx-5 px-5 transition-all duration-300">
         <Link href="/" className="flex items-center justify-center w-full">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center justify-center">
