@@ -196,7 +196,7 @@ export default function InboxPage() {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
             <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Unipile Sync Activo (LinkedIn)
+            Sincronización Cloud Activa (LinkedIn)
           </div>
         </div>
       </div>

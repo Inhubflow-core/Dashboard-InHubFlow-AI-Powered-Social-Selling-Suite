@@ -282,7 +282,7 @@ export default function AdminSubscribersPage() {
             {stats.totalConnectedAccounts}
           </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Cuentas LinkedIn activas en Unipile
+            Cuentas LinkedIn activas sincronizadas
           </p>
         </div>
       </div>

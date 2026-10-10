@@ -24,7 +24,7 @@ interface ServiceStatus {
 
 const SERVICES: ServiceStatus[] = [
   {
-    name: "Unipile LinkedIn Cloud Bridge",
+    name: "InHubFlow LinkedIn Cloud Bridge",
     category: "Mensajería & Conexión",
     uptime: "99.98%",
     latency: "142 ms",
@@ -45,7 +45,7 @@ const SERVICES: ServiceStatus[] = [
     status: "operational",
   },
   {
-    name: "Canvas n8n Sequence Worker",
+    name: "Canvas Workflow Sequence Worker",
     category: "Automatización & Delays",
     uptime: "99.99%",
     latency: "95 ms",

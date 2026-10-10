@@ -466,7 +466,7 @@ Comenta "${leadMagnetKeyword}" abajo y te envio el framework completo en PDF sin
                     onClick={() => handleSavePost("published")}
                     className="rounded-lg bg-brand-500 px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-600 transition"
                   >
-                    Publicar Ahora (Unipile)
+                    Publicar Ahora en LinkedIn
                   </button>
                 </div>
               </div>

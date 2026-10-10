@@ -62,7 +62,7 @@ export default function MyPostsSignalRadarPage() {
 
   return (
     <div className="space-y-6">
-      <PageBreadcrumb pageTitle="Signal Radar - Nivel 01: Mis Posts (Lead Magnet / ManyChat)" />
+      <PageBreadcrumb pageTitle="Signal Radar - Nivel 01: Mis Posts (Lead Magnet)" />
 
       {/* Métricas del Nivel 1 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -119,7 +119,7 @@ export default function MyPostsSignalRadarPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl border border-brand-200 bg-brand-25/40 dark:border-brand-900 dark:bg-brand-950/20">
         <div>
           <h4 className="text-sm font-bold text-brand-900 dark:text-brand-200">
-            Mecanica de Automatizacion ManyChat en LinkedIn (Nivel 1)
+            Mecanica de Automatizacion de Lead Magnet en LinkedIn (Nivel 1)
           </h4>
           <p className="text-xs text-brand-700 dark:text-brand-300 mt-1 max-w-2xl">
             Al detectar la palabra clave en tu post: (1) Da Like al comentario, (2) Responde un mensaje publico de confirmacion, y (3) Valida conexion para enviar el PDF adjunto de forma instantanea por mensaje privado.

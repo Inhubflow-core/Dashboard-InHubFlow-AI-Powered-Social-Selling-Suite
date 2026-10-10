@@ -150,7 +150,7 @@ Guarda esta estructura para auditar tu perfil hoy mismo.`,
     author: "Martin Gomez",
     authorHeadline: "Head of Sales Pipeline en B2B Mastery",
     publishedDate: "Hace 1 semana",
-    topic: "Lead Magnets & ManyChat",
+    topic: "Lead Magnets & Automatización",
     format: "carousel",
     hook: "5 lead magnets en formato PDF que generan mas de 20 clientes al mes en LinkedIn:",
     fullContent: `5 lead magnets en formato PDF que generan mas de 20 clientes al mes en LinkedIn:
@@ -389,8 +389,8 @@ Enfoca cada publicacion en un problema que tu servicio soluciona directamente.`,
     publishedDate: "Hace 5 dias",
     topic: "Prospeccion con IA",
     format: "carousel",
-    hook: "El mapa completo de un embudo ManyChat aplicado a LinkedIn para captar leads en piloto automatico:",
-    fullContent: `El mapa completo de un embudo ManyChat aplicado a LinkedIn para captar leads en piloto automatico:
+    hook: "El mapa completo de un embudo automatizado aplicado a LinkedIn para captar leads en piloto automatico:",
+    fullContent: `El mapa completo de un embudo automatizado aplicado a LinkedIn para captar leads en piloto automatico:
 
 Paso 1: Post con Lead Magnet.
 Paso 2: Disparador por palabra clave en comentarios.
@@ -531,7 +531,7 @@ Comenta SISTEMA abajo y te envio el framework completo en PDF sin costo.`,
       },
       {
         slideNumber: 3,
-        title: "Paso 2: Activacion ManyChat",
+        title: "Paso 2: Activacion Inbound Lead Magnet",
         content: [
           "El decisor comenta la palabra clave.",
           "El sistema reacciona y confirma el envio publicamente.",

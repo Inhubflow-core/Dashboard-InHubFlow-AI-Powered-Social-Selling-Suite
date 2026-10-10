@@ -27,18 +27,18 @@ interface GuideItem {
 const GUIDES: GuideItem[] = [
   {
     category: "Inicio Rápido",
-    title: "Cómo vincular tu primera cuenta de LinkedIn vía Unipile",
+    title: "Cómo vincular tu primera cuenta de LinkedIn en la Nube",
     desc: "Aprende el proceso paso a paso para autenticar cuentas de forma segura con emulación humana.",
     readTime: "3 min de lectura",
   },
   {
     category: "Signal Radar",
-    title: "Configuración de Lead Magnets en posts de LinkedIn (ManyChat Flow)",
+    title: "Configuración de Lead Magnets en posts de LinkedIn (Flow Automatizado)",
     desc: "Cómo captar leads calificados cuando comentan palabras clave en tus publicaciones virales.",
     readTime: "5 min de lectura",
   },
   {
-    category: "Campañas n8n",
+    category: "Campañas Workflow",
     title: "Diseño de secuencias visuales de prospección con retardos seguros",
     desc: "Mejores prácticas para configurar el Canvas con pausas aleatorias de 3 a 12 minutos y entregas de PDF.",
     readTime: "4 min de lectura",
@@ -66,7 +66,7 @@ const GUIDES: GuideItem[] = [
 const FAQS = [
   {
     q: "¿Existe riesgo de baneo o restricción de mi cuenta de LinkedIn?",
-    a: "InHubFlow utiliza la infraestructura de Unipile, que emula la navegación de un navegador real con User-Agents residenciales fijos y descansos humanos aleatorios (jitter). Además, el sistema impone límites estrictos de máximo 20-25 invitaciones diarias por cuenta.",
+    a: "InHubFlow utiliza una infraestructura segura en la nube que emula la navegación de un navegador real con User-Agents residenciales fijos y descansos humanos aleatorios (jitter). Además, el sistema impone límites estrictos de máximo 20-25 invitaciones diarias por cuenta.",
   },
   {
     q: "¿Qué ocurre cuando se alcanza el límite de slots de mi plan?",
@@ -78,7 +78,7 @@ const FAQS = [
   },
   {
     q: "¿Puedo sincronizar las respuestas de LinkedIn con mi CRM externo (HubSpot, Salesforce)?",
-    a: "Sí. Desde la sección de Configuración > Ajustes Generales puedes configurar un Webhook saliente en formato JSON para que cada lead calificado se sincronice instantáneamente con Make, Zapier o n8n.",
+    a: "Sí. Desde la sección de Configuración > Ajustes Generales puedes configurar un Webhook saliente en formato JSON para que cada lead calificado se sincronice instantáneamente con Make, Zapier o sistemas externos.",
   },
 ];
 

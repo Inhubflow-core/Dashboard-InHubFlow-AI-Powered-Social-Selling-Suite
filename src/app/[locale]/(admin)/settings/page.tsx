@@ -220,7 +220,7 @@ export default function WorkspaceSettingsPage() {
                 Webhooks de Integración Saliente
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Envía eventos en tiempo real a Zapier, Make, n8n o tu CRM cuando ocurra una interacción relevante.
+                Envía eventos en tiempo real a Zapier, Make o tu CRM cuando ocurra una interacción relevante.
               </p>
             </div>
           </div>

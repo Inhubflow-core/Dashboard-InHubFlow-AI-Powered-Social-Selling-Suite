@@ -22,9 +22,9 @@ const metrics = [
     highlight: false,
   },
   {
-    title: "Secuencias Activas (n8n)",
+    title: "Secuencias Activas (Workflow)",
     value: "18",
-    change: "Pacing humano seguro (Unipile)",
+    change: "Pacing humano seguro (InHubFlow)",
     highlight: false,
   },
   {
@@ -49,7 +49,7 @@ const modules = [
     action: "Ver Monitores",
   },
   {
-    name: "3. Campañas (Canvas n8n)",
+    name: "3. Campañas (Canvas Workflow)",
     desc: "Constructor interactivo de secuencias en lienzo de nodos con React Flow, delays y condiciones.",
     link: "/campaigns",
     action: "Abrir Canvas",
@@ -191,7 +191,7 @@ export default function SocialSellingDashboard() {
 
         <div className="col-span-12 lg:col-span-4">
           <ComponentCard
-            title="Pacing & Seguridad Unipile"
+            title="Pacing & Seguridad LinkedIn"
             desc="Limites de navegacion humana."
           >
             <div className="space-y-4">

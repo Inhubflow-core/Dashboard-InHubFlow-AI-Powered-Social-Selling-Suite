@@ -60,7 +60,7 @@ export default function ViralRadarPage() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por tema, palabra clave, gancho o autor (ej. Social Selling, ManyChat, IA)..."
+                placeholder="Buscar por tema, palabra clave, gancho o autor (ej. Social Selling, Lead Magnet, IA)..."
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               />
             </div>

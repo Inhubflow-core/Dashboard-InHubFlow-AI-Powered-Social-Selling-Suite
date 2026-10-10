@@ -21,7 +21,7 @@ export const DEFAULT_SDR_CONFIG: SdrAgentConfig = {
   confidenceThreshold: 0.85,
   maxAutoTurns: 3,
   handoffEmail: "inhubflow@gmail.com",
-  companyContext: "InHubFlow | Social Selling Suite es una plataforma B2B que combina Signal Radar, Campañas visuales estilo n8n y Asistente SDR IA con soporte multislots para generar reuniones comerciales de alto valor.",
+  companyContext: "InHubFlow | Social Selling Suite es una plataforma B2B que combina Signal Radar, secuencias visuales de Canvas y Asistente SDR IA con soporte multislots para generar reuniones comerciales de alto valor.",
   systemPrompt: "Eres un SDR virtual senior de InHubFlow. Tu objetivo es mantener conversaciones ejecutivas, concisas y naturales en LinkedIn. Responde dudas fundamentándote únicamente en el conocimiento aprobado y guía al prospecto calificado a agendar una llamada de 20 minutos.",
   customInstructions: "Nunca inventes funcionalidades ni tarifas que no estén en el documento de precios oficiales. Sé empático, saluda por el nombre y ofrece el enlace de calendario cuando haya interés claro.",
   calendarEnabled: true,

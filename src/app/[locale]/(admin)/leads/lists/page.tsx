@@ -14,7 +14,7 @@ export default function SignalListsPage() {
   const [newListDesc, setNewListDesc] = useState("");
   const [newSignalSource, setNewSignalSource] = useState("Post SISTEMA");
   const [newSignalLevel, setNewSignalLevel] = useState<"level_1" | "level_2" | "level_3">("level_1");
-  const [newAssignedCampaign, setNewAssignedCampaign] = useState("Secuencia Lead Magnet ManyChat (Nivel 1)");
+  const [newAssignedCampaign, setNewAssignedCampaign] = useState("Secuencia Lead Magnet Automatizada (Nivel 1)");
 
   const handleCreateList = (e: React.FormEvent) => {
     e.preventDefault();

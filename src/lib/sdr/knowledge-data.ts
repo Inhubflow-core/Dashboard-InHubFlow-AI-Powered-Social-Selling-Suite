@@ -9,7 +9,7 @@ export const INITIAL_KNOWLEDGE_SOURCES: KnowledgeSource[] = [
 Sus 4 pilares diferenciales son:
 1. Viral Post Engine: Modelador de publicaciones virales con IA calibrada en copywriting de alta tracción y calendario editorial.
 2. Signal Radar (3 Niveles): Detección en tiempo real de leads interactuando con nuestros posts (Nivel 1), posts de la competencia (Nivel 2) o tendencias globales de LinkedIn (Nivel 3).
-3. Campañas Visuales (Canvas n8n): Flujos multi-paso con pausas inteligentes, comprobación de conexión y envío de DMs contextuales.
+3. Campañas Visuales (Canvas Workflow): Flujos multi-paso con pausas inteligentes, comprobación de conexión y envío de DMs contextuales.
 4. Asistente SDR IA con Sistema Multislots: Agente autónomo con supervisión que clasifica respuestas, resuelve dudas fundamentadas y coordina llamadas comerciales respetando cuotas por cuenta conectada.`,
     status: "approved",
     updatedAt: "2026-10-01T12:00:00Z",

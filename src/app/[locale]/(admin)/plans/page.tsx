@@ -75,7 +75,7 @@ export default function PlansPricingPage() {
           Elige el Plan que Mejor se Adapta a tus Objetivos de Prospeccion
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-          Todos los planes incluyen el Viral Post Engine, el Radar de Senales de 3 Niveles y el Constructor de Campanas visual estilo n8n con proteccion anti-bloqueo.
+          Todos los planes incluyen el Viral Post Engine, el Radar de Senales de 3 Niveles y el Constructor de Campanas visual estilo Canvas Workflow con proteccion anti-bloqueo.
         </p>
 
         {/* Toggle Facturación */}
@@ -237,7 +237,7 @@ export default function PlansPricingPage() {
               Que es un Slot de Cuenta?
             </h4>
             <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-              Un slot representa una ranura activa que te permite conectar 1 perfil personal de LinkedIn a traves de Unipile. Si contratas el Plan Growth (5 slots), puedes conectar hasta 5 perfiles simultaneos y distribuirlos en tu equipo.
+              Un slot representa una ranura activa que te permite conectar 1 perfil personal de LinkedIn a la plataforma. Si contratas el Plan Growth (5 slots), puedes conectar hasta 5 perfiles simultaneos y distribuirlos en tu equipo.
             </p>
           </div>
 

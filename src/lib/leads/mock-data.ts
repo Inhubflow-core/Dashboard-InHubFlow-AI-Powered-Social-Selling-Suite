@@ -8,7 +8,7 @@ export const initialLeadLists: LeadListGroup[] = [
     signalSource: "Post SISTEMA (Lead Magnet Propio)",
     signalLevel: "level_1",
     leadsCount: 28,
-    assignedCampaign: "Secuencia Lead Magnet ManyChat (Nivel 1)",
+    assignedCampaign: "Secuencia Lead Magnet InHubFlow (Nivel 1)",
     createdAt: "2026-10-05T09:00:00.000Z",
   },
   {
@@ -18,7 +18,7 @@ export const initialLeadLists: LeadListGroup[] = [
     signalSource: "Post PLANTILLA (Lead Magnet Propio)",
     signalLevel: "level_1",
     leadsCount: 54,
-    assignedCampaign: "Secuencia Lead Magnet ManyChat (Nivel 1)",
+    assignedCampaign: "Secuencia Lead Magnet InHubFlow (Nivel 1)",
     createdAt: "2026-10-06T14:30:00.000Z",
   },
   {
@@ -62,7 +62,7 @@ export const initialLeadsData: Lead360Item[] = [
     sequenceStatus: "replied",
     listId: "list-l1-sistema",
     listName: "Leads Nivel 1 - Post SISTEMA",
-    activeCampaignName: "Secuencia Lead Magnet ManyChat (Nivel 1)",
+    activeCampaignName: "Secuencia Lead Magnet InHubFlow (Nivel 1)",
     createdAt: "2026-10-06T09:15:00.000Z",
     lastActivityAt: "Hace 15 minutos",
     timeline: [
@@ -121,7 +121,7 @@ export const initialLeadsData: Lead360Item[] = [
     sequenceStatus: "replied",
     listId: "list-l1-sistema",
     listName: "Leads Nivel 1 - Post SISTEMA",
-    activeCampaignName: "Secuencia Lead Magnet ManyChat (Nivel 1)",
+    activeCampaignName: "Secuencia Lead Magnet InHubFlow (Nivel 1)",
     createdAt: "2026-10-06T11:20:00.000Z",
     lastActivityAt: "Ayer a las 16:30",
     timeline: [
@@ -209,7 +209,7 @@ export const initialLeadsData: Lead360Item[] = [
     sequenceStatus: "in_progress",
     listId: "list-l1-plantilla",
     listName: "Leads Nivel 1 - Post PLANTILLA",
-    activeCampaignName: "Secuencia Lead Magnet ManyChat (Nivel 1)",
+    activeCampaignName: "Secuencia Lead Magnet InHubFlow (Nivel 1)",
     createdAt: "2026-10-07T08:00:00.000Z",
     lastActivityAt: "Hace 1 hora",
     timeline: [

@@ -156,7 +156,7 @@ export default function PostsListPage() {
                         </span>
                         {post.leadMagnetKeyword && (
                           <span className="rounded bg-brand-50 px-2 py-0.5 text-[11px] font-mono font-semibold text-brand-700 dark:bg-brand-950 dark:text-brand-300">
-                            ManyChat: {post.leadMagnetKeyword}
+                            Keyword: {post.leadMagnetKeyword}
                           </span>
                         )}
                         <span className="text-[11px] text-gray-400">

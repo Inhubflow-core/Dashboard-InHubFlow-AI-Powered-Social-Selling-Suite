@@ -520,7 +520,7 @@ export default function SdrAgentPage() {
                     1. Captura
                   </div>
                   <div className="mt-1 text-[11px] text-gray-500">
-                    Sincronización vía Unipile con deduplicación por message_id.
+                    Sincronización segura con deduplicación por message_id.
                   </div>
                 </div>
 

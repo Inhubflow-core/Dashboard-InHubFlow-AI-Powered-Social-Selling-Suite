@@ -19,7 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 interface SupportTicket {
   id: string;
   subject: string;
-  category: "technical" | "billing" | "campaigns" | "unipile";
+  category: "technical" | "billing" | "campaigns" | "linkedin";
   priority: "low" | "medium" | "high";
   status: "open" | "in_review" | "resolved";
   createdAt: string;
@@ -38,8 +38,8 @@ const INITIAL_TICKETS: SupportTicket[] = [
   },
   {
     id: "TICK-4105",
-    subject: "Verificación de latencia de sincronización Unipile",
-    category: "unipile",
+    subject: "Verificación de latencia de sincronización LinkedIn",
+    category: "linkedin",
     priority: "low",
     status: "in_review",
     createdAt: "2026-10-09T08:15:00Z",
@@ -242,7 +242,7 @@ export default function SupportTicketsPage() {
                     className="mt-1 w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs text-gray-900 focus:outline-hidden dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                   >
                     <option value="technical">Incidencia Técnica</option>
-                    <option value="unipile">Conexión LinkedIn / Unipile</option>
+                    <option value="linkedin">Conexión de Cuentas LinkedIn</option>
                     <option value="campaigns">Secuencias & Campañas</option>
                     <option value="billing">Planes & Facturación</option>
                   </select>

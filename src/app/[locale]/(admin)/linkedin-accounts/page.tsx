@@ -104,7 +104,7 @@ export default function LinkedInAccountsPage() {
       const data = await res.json();
       if (data.accounts && Array.isArray(data.accounts)) {
         // Enriquecer o sincronizar
-        setNotice("Cuentas sincronizadas con Unipile API.");
+        setNotice("Cuentas de LinkedIn sincronizadas exitosamente.");
       } else {
         setNotice("Sincronizacion completada en modo seguro.");
       }
@@ -236,7 +236,7 @@ export default function LinkedInAccountsPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Estado del Gateway Unipile
+                    Estado del Motor Cloud LinkedIn
                   </h3>
                   {unipileStatus?.configured ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
@@ -252,8 +252,8 @@ export default function LinkedInAccountsPage() {
                 </div>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {unipileStatus?.configured
-                    ? `Conectado a nodo DSN: ${unipileStatus.dsn || "Configurado"}. Todas las peticiones van directamente a Unipile.`
-                    : "No se detectaron las variables UNIPILE_DSN y UNIPILE_API_KEY en las variables de entorno. Operando con simulacion para previsualizar flujos de trabajo sin interrupciones."}
+                    ? `Conectado a nodo seguro: ${unipileStatus.dsn || "Configurado"}. Todas las peticiones van directamente a la infraestructura de enlace.`
+                    : "No se detectaron las credenciales de enlace activo en las variables de entorno. Operando en modo de demostracion seguro para previsualizar flujos de trabajo sin interrupciones."}
                 </p>
               </div>
             </div>

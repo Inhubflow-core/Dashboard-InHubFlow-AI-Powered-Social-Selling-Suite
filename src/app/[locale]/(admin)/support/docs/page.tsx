@@ -35,7 +35,7 @@ export default function ApiDocsPage() {
   "event": "message_received",
   "account_id": "up_acc_roberto_orse_main",
   "chat_id": "conv-1",
-  "message_id": "msg_unipile_872364812",
+  "message_id": "msg_ihf_872364812",
   "message": "Hola Roberto, vi el caso de exito sobre prospeccion B2B con IA y me gustaria coordinar una demo.",
   "timestamp": "2026-10-09T14:30:00Z",
   "sender": {
@@ -61,7 +61,7 @@ export default function ApiDocsPage() {
             }`}
           >
             <Cpu className="size-3.5" />
-            <span>Simulador Unipile & Webhooks</span>
+            <span>Simulador de Eventos & Webhooks</span>
           </button>
 
           <button
@@ -93,7 +93,7 @@ export default function ApiDocsPage() {
                   InHubFlow Developer API v1
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Conecta de forma programática tus bases de leads, automatizaciones en n8n/Make y eventos en tiempo real.
+                  Conecta de forma programática tus bases de leads, automatizaciones externas y eventos en tiempo real.
                 </p>
               </div>
             </div>
@@ -135,12 +135,12 @@ export default function ApiDocsPage() {
             <div className="flex items-center gap-2.5 border-b border-gray-100 pb-3 dark:border-gray-800">
               <Webhook className="size-4 text-[#0099ff]" />
               <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                Estructura del Webhook Entrante de Unipile (`/api/unipile/webhook`)
+                Estructura del Webhook Entrante de Mensajería (`/api/unipile/webhook`)
               </h4>
             </div>
 
             <p className="mt-2 text-xs text-gray-500">
-              Payload JSON recibido directamente desde los servidores de Unipile cuando un prospecto envía un mensaje o acepta una invitación:
+              Payload JSON recibido directamente desde los servidores de enlace cuando un prospecto envía un mensaje o acepta una invitación:
             </p>
 
             <div className="mt-3 relative rounded-xl bg-gray-950 p-4 font-mono text-xs text-emerald-400">

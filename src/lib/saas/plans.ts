@@ -19,7 +19,7 @@ export const SAAS_PLANS: Record<PlanTier, SaaSPlanConfig> = {
       { text: "1 cuenta de LinkedIn conectada (1 Slot)", included: true, highlight: true },
       { text: "Viral Post Engine: Generador de texto, imagen y carruseles PDF", included: true },
       { text: "Calendario Editorial con reprogramacion Drag & Drop", included: true },
-      { text: "Signal Radar Nivel 1: Automatizacion de comentarios y ManyChat", included: true },
+      { text: "Signal Radar Nivel 1: Automatizacion de comentarios y Lead Magnet", included: true },
       { text: "Signal Radar Nivel 2 y 3 (Monitoreo de competencia y red)", included: true },
       { text: "Constructor de Campanas Visuales en Canvas (React Flow)", included: true },
       { text: "Lanza hasta 3 campanas simultaneas", included: true },

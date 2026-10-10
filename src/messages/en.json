@@ -36,10 +36,10 @@
       "postList": "Publicaciones",
       "editorialCalendar": "Calendario Editorial",
       "signalRadar": "Signal Radar",
-      "myPosts": "Nivel 1: Mis Posts (ManyChat)",
+      "myPosts": "Nivel 1: Mis Posts (Lead Magnet)",
       "competitorPosts": "Nivel 2: Competencia",
       "globalPosts": "Nivel 3: LinkedIn Global",
-      "campaigns": "Campañas (Canvas n8n)",
+      "campaigns": "Campañas (Canvas Workflow)",
       "leads": "Leads & CRM",
       "leadsDirectory": "Directorio de Leads",
       "leadsLists": "Listas por Señal",
@@ -156,7 +156,7 @@
     },
     "widget": {
       "title": "Conexion LinkedIn",
-      "description": "Unipile sincronizado. Pacing de seguridad activo.",
+      "description": "LinkedIn sincronizado. Pacing de seguridad activo.",
       "purchasePlan": "Gestionar Cuentas"
     }
   },

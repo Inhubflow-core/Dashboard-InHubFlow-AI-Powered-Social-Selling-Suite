@@ -201,7 +201,7 @@ export default function CampaignsPage() {
       {/* Barra Superior de la Campaña */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800">
         <div>
-          <PageBreadcrumb pageTitle="Constructor Visual de Campañas (Canvas n8n)" />
+          <PageBreadcrumb pageTitle="Constructor Visual de Campañas (Canvas Workflow)" />
           <p className="text-xs text-gray-500 dark:text-gray-400 -mt-4">
             Diseño modular de secuencias con retardo humano, bifurcaciones lógicas y detención automática ante respuesta.
           </p>
@@ -490,7 +490,7 @@ export default function CampaignsPage() {
             <div className="flex items-start justify-between border-b border-gray-100 pb-3 dark:border-gray-800">
               <div>
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                  Motor de Seguridad y Pacing Humano (Unipile)
+                  Motor de Seguridad y Pacing Humano (InHubFlow)
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Parametros de navegacion y proteccion de cuenta de LinkedIn.
@@ -596,7 +596,7 @@ export default function CampaignsPage() {
                     Logs de Auditoría del Campaign Runner ({runnerLogs.length})
                   </h3>
                   <p className="text-[11px] text-gray-500">
-                    Historial de ejecución de nodos, llamadas a Unipile y controles de pacing en vivo.
+                    Historial de ejecución de nodos, llamadas a LinkedIn y controles de pacing en vivo.
                   </p>
                 </div>
               </div>

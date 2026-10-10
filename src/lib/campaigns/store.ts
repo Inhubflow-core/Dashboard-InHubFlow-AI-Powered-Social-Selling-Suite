@@ -7,7 +7,7 @@ const WORKFLOW_KEY = "inhubflow_active_campaign";
 
 export const initialWorkflow: CampaignWorkflow = {
   id: "wf-01",
-  name: "Secuencia Lead Magnet ManyChat (Nivel 1 - SISTEMA)",
+  name: "Secuencia Lead Magnet InHubFlow (Nivel 1 - SISTEMA)",
   description: "Captura de leads por comentarios en post propio, entrega de PDF y follow-up multietapa.",
   status: "active",
   dailyInvitationLimit: 25,

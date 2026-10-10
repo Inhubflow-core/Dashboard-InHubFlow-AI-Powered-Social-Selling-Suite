@@ -34,7 +34,7 @@ export default function PipelineCalendarPage() {
   // Formulario nueva cita
   const [newLeadName, setNewLeadName] = useState("");
   const [newCompany, setNewCompany] = useState("");
-  const [newTitle, setNewTitle] = useState("Demostracion InHubFlow + Unipile");
+  const [newTitle, setNewTitle] = useState("Demostracion InHubFlow Social Selling");
   const [newDate, setNewDate] = useState("Viernes, 17 de Octubre");
   const [newTime, setNewTime] = useState("10:00 AM - 10:45 AM");
   const [newDuration, setNewDuration] = useState("45 min");
@@ -212,7 +212,7 @@ export default function PipelineCalendarPage() {
             91.4%
           </p>
           <span className="text-[10px] text-gray-400 mt-0.5 block">
-            Recordatorios automaticos Unipile
+            Recordatorios automaticos por DM
           </span>
         </div>
 
@@ -401,7 +401,7 @@ export default function PipelineCalendarPage() {
               Tu Enlace de Agendamiento
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Comparte este enlace directamente en LinkedIn o insertalo en los flujos n8n para que los leads elijan su horario.
+              Comparte este enlace directamente en LinkedIn o insertalo en los flujos automatizados para que los leads elijan su horario.
             </p>
 
             <div className="rounded-xl border border-brand-200 bg-brand-50/50 p-2.5 dark:border-brand-900 dark:bg-brand-950/20 mb-3">

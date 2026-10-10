@@ -63,7 +63,7 @@ export default function SecuritySettingsPage() {
               Claves de API de InHubFlow (REST API)
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Utiliza esta clave para autenticar peticiones programáticas a la API de InHubFlow desde tu backend, Zapier o n8n.
+              Utiliza esta clave para autenticar peticiones programáticas a la API de InHubFlow desde tu backend o herramientas de automatización.
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ export default function SecuritySettingsPage() {
         </div>
       </div>
 
-      {/* Protocolos de Conexión Unipile */}
+      {/* Protocolos de Conexión Cloud LinkedIn */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
           <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
@@ -124,7 +124,7 @@ export default function SecuritySettingsPage() {
               Cifrado & Aislamiento de Cuentas de LinkedIn
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Estándares de seguridad aplicados a las credenciales y tokens de Unipile.
+              Estándares de seguridad aplicados a las credenciales y tokens de sesión.
             </p>
           </div>
         </div>

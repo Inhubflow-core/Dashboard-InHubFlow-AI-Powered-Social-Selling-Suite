@@ -182,7 +182,7 @@ export const INITIAL_MEETINGS: CommercialMeeting[] = [
     timeZone: "America/Mexico_City (GMT-6)",
     attendees: ["roberto@inhubflow.com", "diego@cloudflowlabs.io"],
     dealValue: "$3,000/mes",
-    notes: "Interesado en secuencias ManyChat y proteccion antiban de Unipile para 5 SDRs.",
+    notes: "Interesado en secuencias de Lead Magnet y proteccion antiban en la nube para 5 SDRs.",
   },
   {
     id: "meet-2",
