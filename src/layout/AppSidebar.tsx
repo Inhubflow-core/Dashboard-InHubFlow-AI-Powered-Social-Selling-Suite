@@ -394,58 +394,51 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={`flex py-8 ${
-          !isExpanded && !isHovered ? "xl:justify-center" : "justify-start"
-        }`}
-      >
-        <Link href="/">
+      {/* Brand Header */}
+      <div className="flex shrink-0 h-16 items-center justify-center border-b border-gray-200 dark:border-gray-800 -mx-5 px-5 transition-all duration-300">
+        <Link href="/" className="flex items-center justify-center w-full">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
+            <div className="flex items-center justify-center">
               <Image
-                className="dark:hidden"
+                className="dark:hidden h-10 w-auto object-contain transition-all duration-200"
                 src="/images/logo/inhubflow-logo-dark.png"
                 alt="InHubFlow"
-                width={160}
-                height={36}
+                width={185}
+                height={42}
                 priority
-                style={{ width: "auto", height: "36px" }}
               />
               <Image
-                className="hidden dark:block"
+                className="hidden dark:block h-10 w-auto object-contain transition-all duration-200"
                 src="/images/logo/inhubflow-logo-light.png"
                 alt="InHubFlow"
-                width={160}
-                height={36}
+                width={185}
+                height={42}
                 priority
-                style={{ width: "auto", height: "36px" }}
               />
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center justify-center">
               <Image
-                className="dark:hidden"
+                className="dark:hidden h-10 w-10 object-contain"
                 src="/images/logo/inhubflow-icon-dark.png"
                 alt="InHubFlow"
-                width={36}
-                height={36}
+                width={40}
+                height={40}
                 priority
-                style={{ width: "36px", height: "36px" }}
               />
               <Image
-                className="hidden dark:block"
+                className="hidden dark:block h-10 w-10 object-contain"
                 src="/images/logo/inhubflow-icon-light.png"
                 alt="InHubFlow"
-                width={36}
-                height={36}
+                width={40}
+                height={40}
                 priority
-                style={{ width: "36px", height: "36px" }}
               />
-            </>
+            </div>
           )}
         </Link>
       </div>
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear pt-3.5">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
