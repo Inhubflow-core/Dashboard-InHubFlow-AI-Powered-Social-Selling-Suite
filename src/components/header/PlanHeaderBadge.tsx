@@ -13,15 +13,7 @@ export default function PlanHeaderBadge() {
   const plan = getPlanConfig(currentUser.planTier);
 
   if (isSuperAdmin) {
-    return (
-      <Link
-        href="/admin/subscribers"
-        className="hidden items-center gap-1.5 rounded-full border border-[#0099ff]/30 bg-[#0099ff]/10 px-3 py-1 text-xs font-semibold text-[#0099ff] transition-all hover:bg-[#0099ff] hover:text-white sm:inline-flex"
-      >
-        <ShieldCheck className="size-3.5" />
-        <span>Super Admin · Ilimitado</span>
-      </Link>
-    );
+    return null;
   }
 
   return (

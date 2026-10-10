@@ -110,22 +110,9 @@ const navItems: NavItem[] = [
     path: "/linkedin-accounts",
   },
   {
-    icon: <Users className="size-5" />,
-    key: "team",
-    path: "/team",
-  },
-  {
     icon: <CreditCard className="size-5" />,
     key: "plans",
     path: "/plans",
-  },
-];
-
-const saasAdminItems: NavItem[] = [
-  {
-    icon: <ShieldCheck className="size-5" />,
-    key: "saasSubscribers",
-    path: "/admin/subscribers",
   },
 ];
 
@@ -464,39 +451,89 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 flex text-xs leading-5 text-gray-400 uppercase ${
+                className={`mb-2 flex text-[11px] font-medium tracking-wider text-gray-400 dark:text-gray-500 uppercase ${
                   !isExpanded && !isHovered
                     ? "xl:justify-center"
                     : "justify-start"
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  t("groups.menu")
+                  "NAVEGACIÓN"
                 ) : (
                   <HorizontaLDots />
                 )}
               </h2>
+
+              {/* SuperAdmin Link only for Master Admin */}
+              {isSuperAdmin && (
+                <Link
+                  href="/admin/subscribers"
+                  title={!isExpanded && !isHovered ? "SuperAdmin" : undefined}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm transition-all mb-2",
+                    isActive("/admin/subscribers")
+                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
+                      : "text-amber-600/90 hover:bg-amber-500/10 dark:text-amber-400/90 hover:text-amber-600 dark:hover:text-amber-300",
+                    !isExpanded && !isHovered ? "justify-center px-0" : "",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-lg transition-colors shrink-0",
+                      isActive("/admin/subscribers")
+                        ? "bg-amber-500 text-white shadow-xs"
+                        : "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+                    )}
+                  >
+                    <ShieldCheck className="size-4.5" />
+                  </div>
+                  {(isExpanded || isHovered || isMobileOpen) && (
+                    <>
+                      <span className="truncate font-semibold">SuperAdmin</span>
+                      <span className="ms-auto text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                        MASTER
+                      </span>
+                    </>
+                  )}
+                </Link>
+              )}
+
+              {/* Admin / Team Link for Workspace Owners */}
+              {!isMember && (
+                <Link
+                  href="/team"
+                  title={!isExpanded && !isHovered ? "Admin" : undefined}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm transition-all mb-2",
+                    isActive("/team")
+                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold"
+                      : "text-emerald-600/90 hover:bg-emerald-500/10 dark:text-emerald-400/90 hover:text-emerald-600 dark:hover:text-emerald-300",
+                    !isExpanded && !isHovered ? "justify-center px-0" : "",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-lg transition-colors shrink-0",
+                      isActive("/team")
+                        ? "bg-emerald-500 text-white shadow-xs"
+                        : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+                    )}
+                  >
+                    <Users className="size-4.5" />
+                  </div>
+                  {(isExpanded || isHovered || isMobileOpen) && (
+                    <>
+                      <span className="truncate font-semibold">Admin</span>
+                      <span className="ms-auto text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                        TEAM
+                      </span>
+                    </>
+                  )}
+                </Link>
+              )}
+
               {renderMenuItems(visibleNavItems, "main")}
             </div>
-
-            {isSuperAdmin && (
-              <div>
-                <h2
-                  className={`mb-4 flex text-xs leading-5 text-[#0099ff] font-bold uppercase ${
-                    !isExpanded && !isHovered
-                      ? "xl:justify-center"
-                      : "justify-start"
-                  }`}
-                >
-                  {isExpanded || isHovered || isMobileOpen ? (
-                    "Administración SaaS"
-                  ) : (
-                    <HorizontaLDots />
-                  )}
-                </h2>
-                {renderMenuItems(saasAdminItems, "main")}
-              </div>
-            )}
 
             {/* Grupo Configuración */}
             {!isMember && (
