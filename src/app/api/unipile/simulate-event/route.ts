@@ -4,6 +4,9 @@ import type { UnipileWebhookPayload } from '@/lib/unipile/types';
 
 export async function POST(req: NextRequest) {
   try {
+    if (process.env.NODE_ENV === 'production' && process.env.INHUBFLOW_ENABLE_WEBHOOK_SIMULATOR !== 'true') {
+      return NextResponse.json({ ok: false, error: 'Simulador disponible solo en entornos locales o con habilitacion explicita.' }, { status: 404 });
+    }
     const body = await req.json();
     const type = body.type || 'incoming_message';
 

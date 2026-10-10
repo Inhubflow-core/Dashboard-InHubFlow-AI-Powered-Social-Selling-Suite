@@ -193,8 +193,21 @@ export async function executeCampaignStepForLead(params: {
       // Visita de perfil a través de Unipile
       try {
         await unipile.resolveProfile(leadState.linkedinUrl, accountId);
-      } catch {
-        // En sandbox no arroja error
+      } catch (error) {
+        const log: CampaignExecutionLog = {
+          id: `log-run-${Date.now()}`,
+          campaignId: workflow.id,
+          leadId: leadState.leadId,
+          leadName: leadState.leadName,
+          nodeId: currentNode.id,
+          nodeLabel: nodeData.label,
+          nodeType: nodeData.nodeType,
+          timestamp: new Date().toISOString(),
+          status: "error",
+          message: error instanceof Error ? error.message : "No se pudo visitar el perfil mediante Unipile.",
+        };
+        recordExecutionLog(log);
+        return { success: false, newState: { ...leadState, state: "failed" }, log };
       }
 
       const nextEdge = edges.find((e) => e.source === currentNode.id);
@@ -249,8 +262,6 @@ export async function executeCampaignStepForLead(params: {
         };
       }
 
-      // Enviar invitación
-      incrementAccountPacing(accountId, "invitation");
       const note = nodeData.noteText
         ? nodeData.noteText.replace("{{first_name}}", leadState.leadName.split(" ")[0])
         : undefined;
@@ -261,10 +272,24 @@ export async function executeCampaignStepForLead(params: {
           provider_id: leadState.providerId || `urn:li:member:${leadState.leadId}`,
           message: note,
         });
-      } catch (err: unknown) {
-        console.warn("[Runner] Error enviando invitación:", err);
+      } catch (error) {
+        const log: CampaignExecutionLog = {
+          id: `log-run-${Date.now()}`,
+          campaignId: workflow.id,
+          leadId: leadState.leadId,
+          leadName: leadState.leadName,
+          nodeId: currentNode.id,
+          nodeLabel: nodeData.label,
+          nodeType: nodeData.nodeType,
+          timestamp: new Date().toISOString(),
+          status: "error",
+          message: error instanceof Error ? error.message : "No se pudo enviar la invitacion mediante Unipile.",
+        };
+        recordExecutionLog(log);
+        return { success: false, newState: { ...leadState, state: "failed" }, log };
       }
 
+      incrementAccountPacing(accountId, "invitation");
       const nextEdge = edges.find((e) => e.source === currentNode.id);
       const nextNodeId = nextEdge ? nextEdge.target : null;
 
@@ -317,7 +342,6 @@ export async function executeCampaignStepForLead(params: {
         };
       }
 
-      incrementAccountPacing(accountId, "dm");
       const messageBody = (nodeData.dmText || "Hola {{first_name}}")
         .replace("{{first_name}}", leadState.leadName.split(" ")[0]);
 
@@ -326,10 +350,24 @@ export async function executeCampaignStepForLead(params: {
           chat_id: `chat-${leadState.leadId}`,
           text: messageBody,
         });
-      } catch (err) {
-        console.warn("[Runner] Error enviando DM:", err);
+      } catch (error) {
+        const log: CampaignExecutionLog = {
+          id: `log-run-${Date.now()}`,
+          campaignId: workflow.id,
+          leadId: leadState.leadId,
+          leadName: leadState.leadName,
+          nodeId: currentNode.id,
+          nodeLabel: nodeData.label,
+          nodeType: nodeData.nodeType,
+          timestamp: new Date().toISOString(),
+          status: "error",
+          message: error instanceof Error ? error.message : "No se pudo enviar el mensaje mediante Unipile.",
+        };
+        recordExecutionLog(log);
+        return { success: false, newState: { ...leadState, state: "failed" }, log };
       }
 
+      incrementAccountPacing(accountId, "dm");
       const nextEdge = edges.find((e) => e.source === currentNode.id);
       const nextNodeId = nextEdge ? nextEdge.target : null;
 

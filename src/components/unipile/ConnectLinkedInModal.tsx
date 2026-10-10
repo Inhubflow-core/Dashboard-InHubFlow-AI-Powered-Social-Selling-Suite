@@ -79,30 +79,15 @@ export default function ConnectLinkedInModal({
 
       setHostedUrl(data.url);
 
-      // Si es simulación o enlace directo, abrir popup
       if (data.url) {
         window.open(data.url, "_blank", "width=600,height=750");
-
-        // Simular registro local de la cuenta
-        const newAcc: ConnectedLinkedInAccount = {
-          id: `acc-li-${Date.now()}`,
-          unipileAccountId: `up_acc_${Date.now()}`,
-          name: accountName.trim() || "Cuenta LinkedIn Conectada",
-          headline: "Perfil conectado mediante Hosted Auth de Unipile",
-          profilePictureUrl: "/images/user/user-01.jpg",
-          status: "OK",
-          authMode: "hosted",
-          connectedAt: new Date().toISOString(),
-          lastSyncAt: "Recien conectado",
-          dailyActionsCount: {
-            invitationsSent: 0,
-            messagesSent: 0,
-            profilesVisited: 0,
-          },
-        };
-
-        onAccountConnected(newAcc);
-        setSuccessNotice("Ventana de conexion abierta. Una vez autorizada en Unipile, el perfil quedara sincronizado.");
+        setSuccessNotice(
+          data.mock
+            ? "Enlace simulado abierto. No se ha conectado ninguna cuenta real."
+            : "Ventana de conexion abierta. La cuenta aparecera despues de completar la autorizacion y sincronizarla."
+        );
+      } else {
+        setErrorMsg("Unipile no devolvio un enlace de autenticacion valido.");
       }
     } catch (err: unknown) {
       setHostedLoading(false);
@@ -144,6 +129,13 @@ export default function ConnectLinkedInModal({
         setIsCheckpoint(true);
         setCheckpointAccountId(data.remoteAccountId);
         setErrorMsg(null);
+        return;
+      }
+
+      // En demo no se debe presentar una cuenta simulada como conexion real.
+      if (data.mock) {
+        setSuccessNotice("Autenticacion simulada correctamente. No se ha conectado ninguna cuenta real.");
+        setNativeLoading(false);
         return;
       }
 

@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { UnipileWebhookPayload } from './types';
+import { persistUnipileEvent } from '@/lib/persistence/webhook-service';
 
 export interface ProcessWebhookResult {
   handled: boolean;
@@ -147,6 +148,8 @@ export async function handleUnipileWebhook(payload: UnipileWebhookPayload): Prom
       },
     };
 
+    const persisted = persistUnipileEvent(payload, result as unknown as Record<string, unknown>);
+    if (persisted.duplicate) return { ...result, message: 'Evento duplicado ignorado por idempotencia.' };
     recordWebhookEvent({
       id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       event,
@@ -175,6 +178,8 @@ export async function handleUnipileWebhook(payload: UnipileWebhookPayload): Prom
       },
     };
 
+    const persisted = persistUnipileEvent(payload, result as unknown as Record<string, unknown>);
+    if (persisted.duplicate) return { ...result, message: 'Evento duplicado ignorado por idempotencia.' };
     recordWebhookEvent({
       id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       event,
@@ -231,6 +236,8 @@ export async function handleUnipileWebhook(payload: UnipileWebhookPayload): Prom
       },
     };
 
+    const persisted = persistUnipileEvent(payload, result as unknown as Record<string, unknown>);
+    if (persisted.duplicate) return { ...result, message: 'Evento duplicado ignorado por idempotencia.' };
     recordWebhookEvent({
       id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       event,
@@ -276,6 +283,8 @@ export async function handleUnipileWebhook(payload: UnipileWebhookPayload): Prom
       },
     };
 
+    const persisted = persistUnipileEvent(payload, result as unknown as Record<string, unknown>);
+    if (persisted.duplicate) return { ...result, message: 'Evento duplicado ignorado por idempotencia.' };
     recordWebhookEvent({
       id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       event,
@@ -295,6 +304,7 @@ export async function handleUnipileWebhook(payload: UnipileWebhookPayload): Prom
     details: payload as Record<string, unknown>,
   };
 
+  persistUnipileEvent(payload, genericResult as unknown as Record<string, unknown>);
   recordWebhookEvent({
     id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     event,

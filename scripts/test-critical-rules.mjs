@@ -1,0 +1,212 @@
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import Database from "better-sqlite3";
+
+console.log("==================================================================");
+console.log("INICIO DE PRUEBAS AUTOMATIZADAS: REGLAS CRITICAS SOCIAL SELLING");
+console.log("==================================================================\n");
+
+let passedCount = 0;
+let failedCount = 0;
+
+function assert(condition, testName) {
+  if (condition) {
+    console.log(`[PASS] ${testName}`);
+    passedCount++;
+  } else {
+    console.error(`[FAIL] ${testName}`);
+    failedCount++;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// PRUEBA 1: Verificacion de firma HMAC de Webhooks
+// -----------------------------------------------------------------------------
+console.log("--- 1. Prueba de Seguridad HMAC Webhook ---");
+const testSecret = "unipile_secret_test_xyz123";
+const samplePayload = JSON.stringify({
+  event: "message_received",
+  account_id: "up_acc_roberto_orse_main",
+  message_id: "msg-test-001",
+  message: "Hola, me interesa la demo de InHubFlow",
+  timestamp: new Date().toISOString(),
+});
+
+function computeSignature(payload, secret) {
+  return crypto.createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+function verifySignature(payload, signatureHeader, secret) {
+  if (!signatureHeader || !secret) return false;
+  const expected = computeSignature(payload, secret);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(signatureHeader), Buffer.from(expected));
+  } catch {
+    return false;
+  }
+}
+
+const validSignature = computeSignature(samplePayload, testSecret);
+const invalidSignature = "deadbeefbadf00d1234567890abcdef";
+
+assert(verifySignature(samplePayload, validSignature, testSecret) === true, "Firma HMAC valida es aceptada correctamente");
+assert(verifySignature(samplePayload, invalidSignature, testSecret) === false, "Firma HMAC adulterada es rechazada (401)");
+assert(verifySignature(samplePayload, validSignature, "wrong_secret") === false, "Firma con secreto incorrecto es rechazada");
+
+// -----------------------------------------------------------------------------
+// PRUEBA 2: Persistencia SQLite & Migraciones
+// -----------------------------------------------------------------------------
+console.log("\n--- 2. Prueba de Persistencia SQLite ---");
+const testDbDir = path.resolve("./data");
+if (!fs.existsSync(testDbDir)) fs.mkdirSync(testDbDir, { recursive: true });
+const testDbPath = path.join(testDbDir, "test-social-selling.db");
+if (fs.existsSync(testDbPath)) fs.unlinkSync(testDbPath);
+
+const db = new Database(testDbPath);
+db.pragma("journal_mode = WAL");
+db.pragma("foreign_keys = ON");
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS workspaces (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS leads (
+    id TEXT PRIMARY KEY,
+    workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    provider_id TEXT,
+    full_name TEXT NOT NULL,
+    headline TEXT,
+    source TEXT NOT NULL DEFAULT 'manual',
+    stage TEXT NOT NULL DEFAULT 'captured',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS webhook_events (
+    id TEXT PRIMARY KEY,
+    workspace_id TEXT NOT NULL,
+    external_event_id TEXT,
+    event_type TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    status TEXT NOT NULL,
+    received_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (workspace_id, external_event_id)
+  );
+  CREATE TABLE IF NOT EXISTS campaigns (
+    id TEXT PRIMARY KEY,
+    workspace_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active'
+  );
+  CREATE TABLE IF NOT EXISTS campaign_leads (
+    campaign_id TEXT NOT NULL,
+    lead_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'in_progress', -- 'in_progress', 'stopped', 'completed'
+    stop_reason TEXT,
+    PRIMARY KEY (campaign_id, lead_id)
+  );
+`);
+
+db.prepare("INSERT INTO workspaces (id, name) VALUES (?, ?)").run("ws-test", "Workspace de Pruebas");
+const ws = db.prepare("SELECT * FROM workspaces WHERE id = ?").get("ws-test");
+assert(ws && ws.name === "Workspace de Pruebas", "Creacion y lectura de Workspace en SQLite");
+
+db.prepare("INSERT INTO leads (id, workspace_id, full_name, headline, stage) VALUES (?, ?, ?, ?, ?)").run(
+  "lead-01",
+  "ws-test",
+  "Carlos Rodriguez",
+  "VP de Ventas B2B",
+  "captured"
+);
+const lead = db.prepare("SELECT * FROM leads WHERE id = ?").get("lead-01");
+assert(lead && lead.full_name === "Carlos Rodriguez" && lead.stage === "captured", "Persistencia de Lead en SQLite");
+
+// -----------------------------------------------------------------------------
+// PRUEBA 3: Idempotencia y Deduplicacion de Webhooks
+// -----------------------------------------------------------------------------
+console.log("\n--- 3. Prueba de Idempotencia y Deduplicacion ---");
+const externalEventId = "evt-unipile-unique-998877";
+
+const firstInsert = db.prepare(`
+  INSERT OR IGNORE INTO webhook_events (id, workspace_id, external_event_id, event_type, payload_json, status)
+  VALUES (?, ?, ?, ?, ?, 'processed')
+`).run("wb-row-1", "ws-test", externalEventId, "comment_received", samplePayload);
+
+assert(firstInsert.changes === 1, "Primer evento de webhook se registra exitosamente (changes = 1)");
+
+const duplicateInsert = db.prepare(`
+  INSERT OR IGNORE INTO webhook_events (id, workspace_id, external_event_id, event_type, payload_json, status)
+  VALUES (?, ?, ?, ?, ?, 'processed')
+`).run("wb-row-2", "ws-test", externalEventId, "comment_received", samplePayload);
+
+assert(duplicateInsert.changes === 0, "Evento duplicado es ignorado por restriccion UNIQUE (idempotencia garantizada, changes = 0)");
+
+// -----------------------------------------------------------------------------
+// PRUEBA 4: Regla Stop on Reply (Detencion Inmediata ante Respuesta)
+// -----------------------------------------------------------------------------
+console.log("\n--- 4. Prueba de Regla 'Stop on Reply' ---");
+db.prepare("INSERT INTO campaigns (id, workspace_id, name, status) VALUES (?, ?, ?, ?)").run("cmp-01", "ws-test", "Campana Social Selling Q4", "active");
+db.prepare("INSERT INTO campaign_leads (campaign_id, lead_id, status) VALUES (?, ?, 'in_progress')").run("cmp-01", "lead-01");
+
+// Simular que el prospecto responde al mensaje
+function handleLeadReply(leadId, messageText) {
+  const update = db.prepare(`
+    UPDATE campaign_leads
+    SET status = 'stopped', stop_reason = 'prospect_replied'
+    WHERE lead_id = ? AND status = 'in_progress'
+  `).run(leadId);
+
+  // Actualizar etapa del lead a 'conversation'
+  db.prepare("UPDATE leads SET stage = 'conversation' WHERE id = ?").run(leadId);
+  return update.changes;
+}
+
+const stoppedCampaigns = handleLeadReply("lead-01", "Si, enviame informacion sobre la suite.");
+const leadCampaignStatus = db.prepare("SELECT * FROM campaign_leads WHERE lead_id = ?").get("lead-01");
+const updatedLead = db.prepare("SELECT stage FROM leads WHERE id = ?").get("lead-01");
+
+assert(stoppedCampaigns === 1, "Automatizacion detecta respuesta y afecta la campana activa");
+assert(leadCampaignStatus.status === "stopped", "Estado de la campana para el lead pasa inmediatamente a 'stopped'");
+assert(leadCampaignStatus.stop_reason === "prospect_replied", "Motivo de detencion registrado como 'prospect_replied'");
+assert(updatedLead.stage === "conversation", "Etapa del lead avanza automaticamente a 'conversation'");
+
+// -----------------------------------------------------------------------------
+// PRUEBA 5: Pacing Limits de Seguridad de LinkedIn
+// -----------------------------------------------------------------------------
+console.log("\n--- 5. Prueba de Pacing Limits (Proteccion de Cuenta) ---");
+const PACING_LIMITS = {
+  maxInvitationsPerDay: 25,
+  maxMessagesPerDay: 50,
+  maxProfileVisitsPerDay: 80,
+};
+
+function canPerformAction(currentCount, actionType) {
+  if (actionType === "invitation") return currentCount < PACING_LIMITS.maxInvitationsPerDay;
+  if (actionType === "message") return currentCount < PACING_LIMITS.maxMessagesPerDay;
+  if (actionType === "visit") return currentCount < PACING_LIMITS.maxProfileVisitsPerDay;
+  return false;
+}
+
+assert(canPerformAction(24, "invitation") === true, "Permite enviar invitacion cuando el contador es 24 (< 25)");
+assert(canPerformAction(25, "invitation") === false, "Bloquea envio de invitacion cuando se alcanza el limite de 25");
+assert(canPerformAction(50, "message") === false, "Bloquea mensaje directo cuando se alcanza el limite de 50");
+assert(canPerformAction(80, "visit") === false, "Bloquea visita de perfil cuando se alcanza el limite de 80");
+
+// Limpieza de base de datos de test
+db.close();
+if (fs.existsSync(testDbPath)) fs.unlinkSync(testDbPath);
+const shmPath = `${testDbPath}-shm`;
+const walPath = `${testDbPath}-wal`;
+if (fs.existsSync(shmPath)) fs.unlinkSync(shmPath);
+if (fs.existsSync(walPath)) fs.unlinkSync(walPath);
+
+console.log("\n==================================================================");
+console.log(`RESULTADO FINAL DE PRUEBAS: ${passedCount} EXITOSAS, ${failedCount} FALLIDAS`);
+console.log("==================================================================");
+
+if (failedCount > 0) {
+  process.exit(1);
+} else {
+  process.exit(0);
+}

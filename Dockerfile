@@ -1,8 +1,12 @@
 FROM node:22-alpine
 
+# Native better-sqlite3 module requires build tooling on Alpine.
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV INHUBFLOW_DB_PATH=/app/data/social-selling.db
 
 # Copiar definiciones de dependencias
 COPY package*.json ./
@@ -20,6 +24,10 @@ ARG NEXT_PUBLIC_BASE_PATH=""
 ENV BASE_PATH=$BASE_PATH
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NODE_ENV=production
+
+# Preparar el volumen SQLite con permisos para el usuario del contenedor
+RUN mkdir -p /app/data && chown -R node:node /app/data
+USER node
 
 # Compilar la aplicacion Next.js
 RUN npm run build
