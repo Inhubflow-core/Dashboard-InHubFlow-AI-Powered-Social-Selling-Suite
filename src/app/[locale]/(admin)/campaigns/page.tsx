@@ -201,7 +201,7 @@ export default function CampaignsPage() {
       {/* Barra Superior de la Campaña */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800">
         <div>
-          <PageBreadcrumb pageTitle="Constructor Visual de Campañas (Canvas Workflow)" />
+          <PageBreadcrumb pageTitle="Constructor Visual de Campañas (Workflow)" />
           <p className="text-xs text-gray-500 dark:text-gray-400 -mt-4">
             Diseño modular de secuencias con retardo humano, bifurcaciones lógicas y detención automática ante respuesta.
           </p>

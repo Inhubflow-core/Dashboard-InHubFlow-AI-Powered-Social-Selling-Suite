@@ -75,7 +75,7 @@ export default function PlansPricingPage() {
           Elige el Plan que Mejor se Adapta a tus Objetivos de Prospeccion
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-          Todos los planes incluyen el Viral Post Engine, el Radar de Senales de 3 Niveles y el Constructor de Campanas visual estilo Canvas Workflow con proteccion anti-bloqueo.
+          Todos los planes incluyen el Viral Post Engine, el Radar de Senales de 3 Niveles y el Constructor de Campanas (Workflow) con proteccion anti-bloqueo.
         </p>
 
         {/* Toggle Facturación */}

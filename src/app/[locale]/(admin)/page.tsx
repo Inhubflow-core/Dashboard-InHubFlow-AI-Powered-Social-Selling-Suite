@@ -49,7 +49,7 @@ const modules = [
     action: "Ver Monitores",
   },
   {
-    name: "3. Campañas (Canvas Workflow)",
+    name: "3. Campañas (Workflow)",
     desc: "Constructor interactivo de secuencias en lienzo de nodos con React Flow, delays y condiciones.",
     link: "/campaigns",
     action: "Abrir Canvas",

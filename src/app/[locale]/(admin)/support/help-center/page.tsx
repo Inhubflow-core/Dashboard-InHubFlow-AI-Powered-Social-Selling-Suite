@@ -38,7 +38,7 @@ const GUIDES: GuideItem[] = [
     readTime: "5 min de lectura",
   },
   {
-    category: "Campañas Workflow",
+    category: "Campañas (Workflow)",
     title: "Diseño de secuencias visuales de prospección con retardos seguros",
     desc: "Mejores prácticas para configurar el Canvas con pausas aleatorias de 3 a 12 minutos y entregas de PDF.",
     readTime: "4 min de lectura",

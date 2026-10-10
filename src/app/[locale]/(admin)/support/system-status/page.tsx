@@ -45,7 +45,7 @@ const SERVICES: ServiceStatus[] = [
     status: "operational",
   },
   {
-    name: "Canvas Workflow Sequence Worker",
+    name: "Workflow Sequence Worker",
     category: "Automatización & Delays",
     uptime: "99.99%",
     latency: "95 ms",
