@@ -25,12 +25,13 @@ ENV BASE_PATH=$BASE_PATH
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NODE_ENV=production
 
-# Preparar el volumen SQLite con permisos para el usuario del contenedor
-RUN mkdir -p /app/data && chown -R node:node /app/data
-USER node
-
 # Compilar la aplicacion Next.js
 RUN npm run build
+
+# Preparar el volumen SQLite y permisos para el usuario del contenedor en runtime
+RUN mkdir -p /app/data && chown -R node:node /app/data /app/.next
+
+USER node
 
 # Variables de runtime
 ENV PORT=3000
